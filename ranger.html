@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ranger</title>
+  <link rel="stylesheet" href="css/ranger.css">
+</head>
+<body>
+
+  <div class="ranger"></div>
+
+  <script type="text/template" id="item-template">
+    <%= name %>
+  </script>
+
+  <script type="text/template" id="pane-template">
+    <div class="title"><%= title %></div>
+    <div class="items"></div>
+  </script>
+
+  <script src="libs/jquery.js"></script>
+  <script src="libs/underscore.js"></script>
+  <script src="libs/backbone.js"></script>
+  <script src="ranger.js"></script>
+  <script src="test.js"></script>
+</body>
+</html>
