@@ -696,11 +696,20 @@
     };
 
     Ranger.prototype.right = function() {
+      if (!this.active) {
+        return;
+      }
       return this.active.trigger('move:right');
     };
 
     Ranger.prototype.left = function() {
-      return console.log(this.pane);
+      var item, pane, _ref;
+      if (!((_ref = this.active) != null ? _ref.parent : void 0)) {
+        return;
+      }
+      item = this.active.parent;
+      pane = item.collection;
+      return pane.trigger('click:item', item);
     };
 
     return Ranger;
@@ -1145,6 +1154,7 @@ module.exports=module.exports=[
       }
       Pane = require('../models/pane.coffee').prototype.model;
       this.child = new Pane(attrs.child);
+      this.child.parent = this;
     }
 
     return Item;

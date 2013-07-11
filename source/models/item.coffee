@@ -12,6 +12,7 @@ class Item extends Base.Model
     return unless attrs.child?
     Pane = require('../models/pane.coffee')::model
     @child = new Pane(attrs.child)
+    @child.parent = this
 
 class Items extends Base.Collection
 
