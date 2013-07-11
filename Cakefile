@@ -4,9 +4,9 @@ http = require 'http'
 fs = require 'fs'
 
 # Configuration
-input = 'source/main.coffee'
-output = 'public/js/main.js'
-publicFolder = './public'
+input = 'example/source/main.coffee'
+output = 'example/js/main.js'
+publicFolder = './example'
 
 option '-p', '--port [port]', 'Set port for cake server'
 option '-w', '--watch', 'Watch the folder for changes'
