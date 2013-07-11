@@ -6,6 +6,7 @@ class Item extends Base.Model
   defaults:
     name: ''
     child: false
+    data: false
 
   constructor: (attrs) ->
     super

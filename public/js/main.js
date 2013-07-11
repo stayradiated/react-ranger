@@ -484,12 +484,26 @@
 })("/../node_modules/base/node_modules/swig")
 },{}],3:[function(require,module,exports){
 (function() {
-  var Base, Items,
+  var Base, Items, template, vent,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Base = require('base');
+
+  vent = null;
+
+  template = null;
+
+  module.exports = function(vnt, tmpl) {
+    if (vent == null) {
+      vent = vnt;
+    }
+    if (template == null) {
+      template = tmpl;
+    }
+    return Items;
+  };
 
   Items = (function(_super) {
     __extends(Items, _super);
@@ -520,7 +534,7 @@
     }
 
     Items.prototype.render = function() {
-      this.el.html(templates.item.render(this.item.toJSON()));
+      this.el.html(template.render(this.item.toJSON()));
       return this;
     };
 
@@ -543,21 +557,33 @@
 
   })(Base.Controller);
 
-  module.exports = Items;
-
 }).call(this);
 
 
 },{"base":1}],4:[function(require,module,exports){
 (function() {
-  var Base, Items, Panes,
+  var Base, Items, Panes, template, vent,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Base = require('base');
 
-  Items = require('../controllers/items.coffee');
+  Items = require('../controllers/items.coffee')();
+
+  vent = null;
+
+  template = null;
+
+  module.exports = function(vnt, tmpl) {
+    if (vent == null) {
+      vent = vnt;
+    }
+    if (template == null) {
+      template = tmpl;
+    }
+    return Panes;
+  };
 
   Panes = (function(_super) {
     __extends(Panes, _super);
@@ -620,7 +646,7 @@
     };
 
     Panes.prototype.render = function() {
-      this.el.html(templates.pane.render(this.pane.toJSON()));
+      this.el.html(template.render(this.pane.toJSON()));
       this.items = this.el.find('.items');
       this.pane.contents.forEach(this.addOne);
       return this;
@@ -676,23 +702,28 @@
 
   })(Base.Controller);
 
-  module.exports = Panes;
-
 }).call(this);
 
 
 },{"../controllers/items.coffee":3,"base":1}],5:[function(require,module,exports){
 (function() {
-  var Base, Item, Items, Pane, Panes, Ranger,
+  var Base, Item, Items, Pane, Panes, Ranger, template, vent,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Base = require('base');
 
-  Panes = require('../controllers/panes.coffee');
+  vent = new Base.Event();
 
-  Items = require('../controllers/items.coffee');
+  template = {
+    pane: require('../views/pane.coffee'),
+    item: require('../views/item.coffee')
+  };
+
+  Panes = require('../controllers/panes.coffee')(vent, template.pane);
+
+  Items = require('../controllers/items.coffee')(vent, template.item);
 
   Pane = require('../models/pane.coffee');
 
@@ -702,6 +733,7 @@
     __extends(Ranger, _super);
 
     function Ranger() {
+      this.open = __bind(this.open, this);
       this.left = __bind(this.left, this);
       this.right = __bind(this.right, this);
       this.down = __bind(this.down, this);
@@ -713,6 +745,10 @@
       this.selectItem = __bind(this.selectItem, this);
       this.selectPane = __bind(this.selectPane, this);
       Ranger.__super__.constructor.apply(this, arguments);
+      this.current = {
+        pane: null,
+        item: null
+      };
       this.panes = new Pane();
       this.panes.on('create:model show', this.addOne);
       vent.on('select:item', this.selectItem);
@@ -720,11 +756,12 @@
     }
 
     Ranger.prototype.selectPane = function(pane) {
-      this.active = pane;
+      this.current.pane = pane;
       return this.el.find('.active.pane').removeClass('active');
     };
 
     Ranger.prototype.selectItem = function(item, pane) {
+      this.current.item = item;
       this.recheck(pane);
       if (!item.child) {
         return;
@@ -775,6 +812,8 @@
           }
           if (i !== length) {
             out = (_base = map[x]).child != null ? (_base = map[x]).child : _base.child = {};
+          } else {
+            map[x].data = item;
           }
         }
       }
@@ -789,34 +828,38 @@
     };
 
     Ranger.prototype.up = function() {
-      if (!this.active) {
+      if (!this.current.pane) {
         return this.selectFirst();
       }
-      return this.active.trigger('move:up');
+      return this.current.pane.trigger('move:up');
     };
 
     Ranger.prototype.down = function() {
-      if (!this.active) {
+      if (!this.current.pane) {
         return this.selectFirst();
       }
-      return this.active.trigger('move:down');
+      return this.current.pane.trigger('move:down');
     };
 
     Ranger.prototype.right = function() {
-      if (!this.active) {
+      if (!this.current.pane) {
         return;
       }
-      return this.active.trigger('move:right');
+      return this.current.pane.trigger('move:right');
     };
 
     Ranger.prototype.left = function() {
       var item, pane, _ref;
-      if (!((_ref = this.active) != null ? _ref.parent : void 0)) {
+      if (!((_ref = this.current.pane) != null ? _ref.parent : void 0)) {
         return;
       }
-      item = this.active.parent;
+      item = this.current.pane.parent;
       pane = item.collection;
       return pane.trigger('click:item', item);
+    };
+
+    Ranger.prototype.open = function() {
+      return this.current.item.data;
     };
 
     return Ranger;
@@ -828,8 +871,8 @@
 }).call(this);
 
 
-},{"../controllers/items.coffee":3,"../controllers/panes.coffee":4,"../models/item.coffee":8,"../models/pane.coffee":9,"base":1}],6:[function(require,module,exports){
-module.exports=module.exports=[
+},{"../controllers/items.coffee":3,"../controllers/panes.coffee":4,"../models/item.coffee":8,"../models/pane.coffee":9,"../views/item.coffee":10,"../views/pane.coffee":11,"base":1}],6:[function(require,module,exports){
+module.exports=[
   {
     "Name": "Chapel Song",
     "AlbumName": "The Art of Flight OST",
@@ -1199,22 +1242,11 @@ module.exports=module.exports=[
 
 },{}],7:[function(require,module,exports){
 (function() {
-  var Base, Items, Panes, Ranger, items, panes;
+  var Base, Ranger, items, openItem, panes;
 
   Base = require('base');
 
   Ranger = require('./controllers/ranger.coffee');
-
-  Panes = require('./controllers/panes.coffee');
-
-  Items = require('./controllers/items.coffee');
-
-  window.vent = new Base.Event();
-
-  window.templates = {
-    pane: require('./views/pane.coffee'),
-    item: require('./views/item.coffee')
-  };
 
   window.ranger = new Ranger({
     el: $('.ranger')
@@ -1224,9 +1256,21 @@ module.exports=module.exports=[
 
   panes = [['Artists', 'ArtistName'], ['Albums', 'AlbumName'], ['Songs', 'Name']];
 
+  openItem = function() {
+    var item;
+    item = ranger.open();
+    if (!item) {
+      return;
+    }
+    return console.log(item);
+  };
+
   document.onkeydown = function(e) {
     var _ref;
     switch (e.which) {
+      case 13:
+        openItem();
+        break;
       case 38:
         ranger.up();
         break;
@@ -1250,7 +1294,7 @@ module.exports=module.exports=[
 }).call(this);
 
 
-},{"./controllers/items.coffee":3,"./controllers/panes.coffee":4,"./controllers/ranger.coffee":5,"./data.json":6,"./views/item.coffee":10,"./views/pane.coffee":11,"base":1}],8:[function(require,module,exports){
+},{"./controllers/ranger.coffee":5,"./data.json":6,"base":1}],8:[function(require,module,exports){
 (function() {
   var Base, Item, Items, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -1263,7 +1307,8 @@ module.exports=module.exports=[
 
     Item.prototype.defaults = {
       name: '',
-      child: false
+      child: false,
+      data: false
     };
 
     function Item(attrs) {

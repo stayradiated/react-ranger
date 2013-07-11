@@ -1,7 +1,14 @@
 
 Base = require 'base'
+Items = require('../controllers/items.coffee')()
 
-Items = require '../controllers/items.coffee'
+vent = null
+template = null
+
+module.exports = (vnt, tmpl) ->
+  vent ?= vnt
+  template ?= tmpl
+  return Panes
 
 class Panes extends Base.Controller
 
@@ -48,7 +55,7 @@ class Panes extends Base.Controller
     @updateScrollbar()
 
   render: =>
-    @el.html templates.pane.render @pane.toJSON()
+    @el.html template.render @pane.toJSON()
     @items = @el.find('.items')
     @pane.contents.forEach(@addOne)
     return this
@@ -81,6 +88,4 @@ class Panes extends Base.Controller
     child = current.child.contents
     item = child.get(0)
     child.trigger 'click:item', item
-
-module.exports = Panes
 

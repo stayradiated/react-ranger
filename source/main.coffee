@@ -1,17 +1,9 @@
 
+# Load Base
 Base = require 'base'
 
+# Load ranger
 Ranger = require './controllers/ranger.coffee'
-Panes = require './controllers/panes.coffee'
-Items = require './controllers/items.coffee'
-
-
-# Global event passer
-window.vent = new Base.Event()
-
-window.templates =
-  pane: require('./views/pane.coffee')
-  item: require('./views/item.coffee')
 
 window.ranger = new Ranger
   el: $('.ranger')
@@ -24,9 +16,15 @@ panes = [
   ['Songs', 'Name']
 ]
 
+openItem = ->
+  item = ranger.open()
+  return unless item
+  console.log item
+
 document.onkeydown = (e) ->
 
   switch e.which
+    when 13 then openItem()
     when 38 then ranger.up()
     when 37 then ranger.left()
     when 39 then ranger.right()

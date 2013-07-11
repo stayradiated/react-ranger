@@ -1,16 +1,28 @@
 
 Base = require 'base'
 
-Panes = require '../controllers/panes.coffee'
-Items = require '../controllers/items.coffee'
+# Global event passer
+vent = new Base.Event()
 
+# Templates
+template =
+  pane: require('../views/pane.coffee')
+  item: require('../views/item.coffee')
+
+# Controllers and Models
+Panes = require('../controllers/panes.coffee')(vent, template.pane)
+Items = require('../controllers/items.coffee')(vent, template.item)
 Pane = require '../models/pane.coffee'
 Item = require '../models/item.coffee'
+
 
 class Ranger extends Base.Controller
 
   constructor: ->
     super
+    @current =
+      pane: null
+      item: null
     @panes = new Pane()
     @panes.on 'create:model show', @addOne
     vent.on 'select:item', @selectItem
@@ -18,11 +30,12 @@ class Ranger extends Base.Controller
   
   # Select a pane
   selectPane: (pane) =>
-    @active = pane
+    @current.pane = pane
     @el.find('.active.pane').removeClass('active')
   
   # Select an item
   selectItem: (item, pane) =>
+    @current.item = item
     @recheck(pane)
     return unless item.child
     @panes.trigger 'show', item.child
@@ -55,7 +68,7 @@ class Ranger extends Base.Controller
           id = out.contents.push( name: item[key] ) - 1
           map[x] = out.contents[id]
         if i isnt length then out = map[x].child ?= {}
-        # else map[x].child = item
+        else map[x].data = item
     @panes.create(main)
   
   # Select the first item in the first pane
@@ -66,24 +79,29 @@ class Ranger extends Base.Controller
   
   # Move up
   up: =>
-    return @selectFirst() unless @active
-    @active.trigger('move:up')
+    return @selectFirst() unless @current.pane
+    @current.pane.trigger('move:up')
   
   # Move down
   down: =>
-    return @selectFirst() unless @active
-    @active.trigger('move:down')
+    return @selectFirst() unless @current.pane
+    @current.pane.trigger('move:down')
   
   # Move right
   right: =>
-    return unless @active
-    @active.trigger('move:right')
+    return unless @current.pane
+    @current.pane.trigger('move:right')
   
   # Move left
   left: =>
-    return unless @active?.parent
-    item = @active.parent
+    return unless @current.pane?.parent
+    item = @current.pane.parent
     pane = item.collection
     pane.trigger('click:item', item)
+
+  # Return the selected item
+  open: =>
+    @current.item.data
+
 
 module.exports = Ranger

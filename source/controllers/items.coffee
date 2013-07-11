@@ -1,6 +1,14 @@
 
 Base = require 'base'
 
+vent = null
+template = null
+
+module.exports = (vnt, tmpl) ->
+  vent ?= vnt
+  template ?= tmpl
+  return Items
+
 class Items extends Base.Controller
   
   tagName: 'div'
@@ -24,7 +32,7 @@ class Items extends Base.Controller
     @el.toggleClass 'hasChild', !!@item.child
 
   render: =>
-    @el.html templates.item.render @item.toJSON()
+    @el.html template.render @item.toJSON()
     return this
 
   remove: =>
@@ -41,4 +49,3 @@ class Items extends Base.Controller
     # Receving message from pane view
     @el.addClass 'active'
 
-module.exports = Items

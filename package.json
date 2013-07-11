@@ -15,6 +15,7 @@
   "devDependencies": {
     "node-static": "*",
     "watchify": "*",
+    "browserify": "*",
     "caching-coffeeify": "*"
   }
 }
