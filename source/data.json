@@ -1,26 +1,4 @@
-init = ->
-
-  window.ranger = new App.Views.Ranger();
-
-  # Keyboard shortcuts
-  document.onkeydown = (e) ->
-    switch e.which
-      when 38 then ranger.up()
-      when 37 then ranger.left()
-      when 39 then ranger.right()
-      when 40 then ranger.down()
-      else console.log e.which
-
-  ranger.loadRaw(songs, panes)
-
-
-panes = [
-  ['Artists', 'ArtistName']
-  ['Albums', 'AlbumName']
-  ['Songs', 'Name']
-]
-
-songs = [
+[
   {
     "Name": "Chapel Song",
     "AlbumName": "The Art of Flight OST",
@@ -387,5 +365,3 @@ songs = [
     "ArtistName": "Little Dragon"
   }
 ]
-
-init()
