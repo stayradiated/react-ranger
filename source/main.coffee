@@ -26,6 +26,5 @@ document.onkeydown = (e) ->
     when 37 then ranger.left()
     when 39 then ranger.right()
     when 40 then ranger.down()
-    else console.log e.which
 
 ranger.loadRaw(items, panes)

@@ -5,15 +5,14 @@ Items = require '../controllers/items.coffee'
 
 class Panes extends Base.Controller
 
+  tagName: 'section'
+  className: 'pane'
   template: new Base.View $('#pane-template').html(), true
-
-  elements:
-    '.items': 'items'
 
   constructor: ->
     super
+    @el = $("<#{@tagName} class=\"#{@className}\">")
     @active = null
-    console.log '> creating a new view', @pane
     @pane.on 'remove', @remove
     @pane.on 'move:up', @up
     @pane.on 'move:down', @down
@@ -21,20 +20,18 @@ class Panes extends Base.Controller
     @pane.contents.on 'click:item', @select
 
   remove: =>
-    console.log '-- removing pane', @pane
     @el.remove()
 
   select: (item) =>
-    console.log item.toJSON(), @pane.toJSON()
     vent.trigger 'select:pane', @pane 
-    @active = @model.contents.indexOf(item)
+    @active = @pane.contents.indexOf(item)
     @el.addClass 'active'
     @el.find('.active').removeClass('active')
     item.trigger 'select'
     vent.trigger 'select:item', item, @pane
 
   render: =>
-    @el.html @template @pane.toJSON()
+    @el.html @template.render @pane.toJSON()
     @items = @el.find('.items')
     @pane.contents.forEach(@addOne)
     return this
@@ -49,7 +46,7 @@ class Panes extends Base.Controller
     active += direction
     max = contents.length - 1
     if active < 0 then active = 0
-    else if active > mac then active = max
+    else if active > max then active = max
     return if active is @active
     @active = active
     item = contents.get(@active)
@@ -62,7 +59,8 @@ class Panes extends Base.Controller
     @move(1)
 
   right: =>
-    current = @model.contents.at(@active)
+    current = @pane.contents.get(@active)
+    return unless current.child
     child = current.child.contents
     item = child.get(0)
     child.trigger 'click:item', item

@@ -10,8 +10,9 @@ Item = require '../models/item.coffee'
 class Ranger extends Base.Controller
 
   constructor: ->
+    super
     @panes = new Pane()
-    @panes.on 'add show', @addone
+    @panes.on 'create:model show', @addOne
     vent.on 'select:item', @selectItem
     vent.on 'select:pane', @selectPane
 
@@ -20,20 +21,19 @@ class Ranger extends Base.Controller
     @el.find('.active.pane').removeClass('active')
 
   selectItem: (item, pane) =>
-    console.log '> selecting pane', pane.id
     @recheck(pane)
     return unless item.child
     @panes.trigger 'show', item.child
 
   recheck: (pane) =>
-    pane.contents.each (item) =>
+    pane.contents.forEach (item) =>
       return unless item.child
       item.child.trigger 'remove'
       @recheck item.child
 
   addOne: (pane) =>
     view = new Panes( pane: pane )
-    @el.append pane.render().el
+    @el.append view.render().el
 
   loadRaw: (array, panes) =>
     map = {}
@@ -53,17 +53,23 @@ class Ranger extends Base.Controller
         # else map[x].child = item
     @panes.create(main)
 
+  selectFirst: =>
+    pane = @panes.first()
+    item = pane.contents.first()
+    return pane.contents.trigger('click:item', item)
+
   up: =>
+    return @selectFirst() unless @active
     @active.trigger('move:up')
 
   down: =>
+    return @selectFirst() unless @active
     @active.trigger('move:down')
 
   right: =>
     @active.trigger('move:right')
 
   left: =>
-    pane = @panes.id
-    console.log pane
+    console.log @pane
 
 module.exports = Ranger

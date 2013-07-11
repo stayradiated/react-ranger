@@ -145,8 +145,8 @@
                     action = this.events[query];
                     split = query.indexOf(' ') + 1;
                     event = query.slice(0, split || 9e9);
-                    selector = query.slice(split);
-                    if (selector.length > 0) {
+                    if (split > 0) {
+                        selector = query.slice(split);
                         el.on(event, selector, this[action]);
                     } else {
                         el.on(event, this[action]);
@@ -243,6 +243,7 @@
         function Collection() {
             Collection.__super__.constructor.apply(this, arguments);
             this._records = [];
+            this.length = 0;
         }
 
         // Load Events
@@ -259,7 +260,9 @@
         Collection.prototype.add = function (model, options) {
 
             // Add to collection
+            model.collection = this;
             this._records.push(model);
+            this.length = this._records.length;
             var self = this;
 
             // Bubble change event
@@ -285,6 +288,7 @@
         Collection.prototype.remove = function (model) {
             var index = this._records.indexOf(model);
             this._records.splice(index, 1);
+            this.length = this._records.length;
             this.trigger('change');
         };
 
@@ -310,6 +314,11 @@
         // Loop over each record in the collection
         Collection.prototype.forEach = function () {
             return Array.prototype.forEach.apply(this._records, arguments);
+        };
+
+        // Get the index of the item
+        Collection.prototype.indexOf = function() {
+            return Array.prototype.indexOf.apply(this._records, arguments);
         };
 
         // Convert the collection into an array of objects
@@ -408,6 +417,10 @@
   Items = (function(_super) {
     __extends(Items, _super);
 
+    Items.prototype.tagName = 'div';
+
+    Items.prototype.className = 'item';
+
     Items.prototype.template = new Base.View($('#item-template').html(), true);
 
     Items.prototype.events = {
@@ -416,8 +429,13 @@
 
     function Items() {
       this.select = __bind(this.select, this);
+      this.click = __bind(this.click, this);
+      this.render = __bind(this.render, this);
+      Items.__super__.constructor.apply(this, arguments);
+      this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
+      this.bind();
       this.item.on('select', this.select);
-      this.el.toggleClass('hasChild', !!this.model.get('child'));
+      this.el.toggleClass('hasChild', !!this.item.child);
     }
 
     Items.prototype.render = function() {
@@ -456,11 +474,11 @@
   Panes = (function(_super) {
     __extends(Panes, _super);
 
-    Panes.prototype.template = new Base.View($('#pane-template').html(), true);
+    Panes.prototype.tagName = 'section';
 
-    Panes.prototype.elements = {
-      '.items': 'items'
-    };
+    Panes.prototype.className = 'pane';
+
+    Panes.prototype.template = new Base.View($('#pane-template').html(), true);
 
     function Panes() {
       this.right = __bind(this.right, this);
@@ -472,8 +490,8 @@
       this.select = __bind(this.select, this);
       this.remove = __bind(this.remove, this);
       Panes.__super__.constructor.apply(this, arguments);
+      this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
       this.active = null;
-      console.log('> creating a new view', this.pane);
       this.pane.on('remove', this.remove);
       this.pane.on('move:up', this.up);
       this.pane.on('move:down', this.down);
@@ -482,14 +500,12 @@
     }
 
     Panes.prototype.remove = function() {
-      console.log('-- removing pane', this.pane);
       return this.el.remove();
     };
 
     Panes.prototype.select = function(item) {
-      console.log(item.toJSON(), this.pane.toJSON());
       vent.trigger('select:pane', this.pane);
-      this.active = this.model.contents.indexOf(item);
+      this.active = this.pane.contents.indexOf(item);
       this.el.addClass('active');
       this.el.find('.active').removeClass('active');
       item.trigger('select');
@@ -497,7 +513,7 @@
     };
 
     Panes.prototype.render = function() {
-      this.el.html(this.template(this.pane.toJSON()));
+      this.el.html(this.template.render(this.pane.toJSON()));
       this.items = this.el.find('.items');
       this.pane.contents.forEach(this.addOne);
       return this;
@@ -519,7 +535,7 @@
       max = contents.length - 1;
       if (active < 0) {
         active = 0;
-      } else if (active > mac) {
+      } else if (active > max) {
         active = max;
       }
       if (active === this.active) {
@@ -540,7 +556,10 @@
 
     Panes.prototype.right = function() {
       var child, current, item;
-      current = this.model.contents.at(this.active);
+      current = this.pane.contents.get(this.active);
+      if (!current.child) {
+        return;
+      }
       child = current.child.contents;
       item = child.get(0);
       return child.trigger('click:item', item);
@@ -580,13 +599,15 @@
       this.right = __bind(this.right, this);
       this.down = __bind(this.down, this);
       this.up = __bind(this.up, this);
+      this.selectFirst = __bind(this.selectFirst, this);
       this.loadRaw = __bind(this.loadRaw, this);
       this.addOne = __bind(this.addOne, this);
       this.recheck = __bind(this.recheck, this);
       this.selectItem = __bind(this.selectItem, this);
       this.selectPane = __bind(this.selectPane, this);
+      Ranger.__super__.constructor.apply(this, arguments);
       this.panes = new Pane();
-      this.panes.on('add show', this.addone);
+      this.panes.on('create:model show', this.addOne);
       vent.on('select:item', this.selectItem);
       vent.on('select:pane', this.selectPane);
     }
@@ -597,7 +618,6 @@
     };
 
     Ranger.prototype.selectItem = function(item, pane) {
-      console.log('> selecting pane', pane.id);
       this.recheck(pane);
       if (!item.child) {
         return;
@@ -607,7 +627,7 @@
 
     Ranger.prototype.recheck = function(pane) {
       var _this = this;
-      return pane.contents.each(function(item) {
+      return pane.contents.forEach(function(item) {
         if (!item.child) {
           return;
         }
@@ -621,7 +641,7 @@
       view = new Panes({
         pane: pane
       });
-      return this.el.append(pane.render().el);
+      return this.el.append(view.render().el);
     };
 
     Ranger.prototype.loadRaw = function(array, panes) {
@@ -654,11 +674,24 @@
       return this.panes.create(main);
     };
 
+    Ranger.prototype.selectFirst = function() {
+      var item, pane;
+      pane = this.panes.first();
+      item = pane.contents.first();
+      return pane.contents.trigger('click:item', item);
+    };
+
     Ranger.prototype.up = function() {
+      if (!this.active) {
+        return this.selectFirst();
+      }
       return this.active.trigger('move:up');
     };
 
     Ranger.prototype.down = function() {
+      if (!this.active) {
+        return this.selectFirst();
+      }
       return this.active.trigger('move:down');
     };
 
@@ -667,9 +700,7 @@
     };
 
     Ranger.prototype.left = function() {
-      var pane;
-      pane = this.panes.id;
-      return console.log(pane);
+      return console.log(this.pane);
     };
 
     return Ranger;
@@ -1082,8 +1113,6 @@ module.exports=module.exports=[
         return ranger.right();
       case 40:
         return ranger.down();
-      default:
-        return console.log(e.which);
     }
   };
 
@@ -1110,7 +1139,7 @@ module.exports=module.exports=[
 
     function Item(attrs) {
       var Pane;
-      console.log('> creating item', attrs.name);
+      Item.__super__.constructor.apply(this, arguments);
       if (attrs.child == null) {
         return;
       }
@@ -1160,9 +1189,8 @@ module.exports=module.exports=[
     };
 
     function Pane(attrs) {
-      console.log('> creating pane', attrs.title);
+      Pane.__super__.constructor.apply(this, arguments);
       this.contents = new Item();
-      console.log('| contents', attrs.contents);
       this.contents.refresh(attrs.contents, true);
     }
 

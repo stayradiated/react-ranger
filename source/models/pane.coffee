@@ -9,9 +9,8 @@ class Pane extends Base.Model
     contents: []
 
   constructor: (attrs) ->
-    console.log '> creating pane', attrs.title
+    super
     @contents = new Item()
-    console.log '| contents', attrs.contents
     @contents.refresh(attrs.contents, true)
 
 class Panes extends Base.Collection

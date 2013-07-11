@@ -8,7 +8,7 @@ class Item extends Base.Model
     child: false
 
   constructor: (attrs) ->
-    console.log '> creating item', attrs.name
+    super
     return unless attrs.child?
     Pane = require('../models/pane.coffee')::model
     @child = new Pane(attrs.child)
