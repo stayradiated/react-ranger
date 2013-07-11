@@ -817,7 +817,7 @@
 
 
 },{"../controllers/items.coffee":3,"../controllers/panes.coffee":4,"../models/item.coffee":8,"../models/pane.coffee":9,"base":1}],6:[function(require,module,exports){
-module.exports=module.exports=[
+module.exports=[
   {
     "Name": "Chapel Song",
     "AlbumName": "The Art of Flight OST",
@@ -1200,8 +1200,8 @@ module.exports=module.exports=[
   window.vent = new Base.Event();
 
   window.templates = {
-    pane: new Base.View($('#pane-template').html(), true),
-    item: new Base.View($('#item-template').html(), true)
+    pane: require('./views/pane.coffee'),
+    item: require('./views/item.coffee')
   };
 
   window.ranger = new Ranger({
@@ -1230,7 +1230,7 @@ module.exports=module.exports=[
 }).call(this);
 
 
-},{"./controllers/items.coffee":3,"./controllers/panes.coffee":4,"./controllers/ranger.coffee":5,"./data.json":6,"base":1}],8:[function(require,module,exports){
+},{"./controllers/items.coffee":3,"./controllers/panes.coffee":4,"./controllers/ranger.coffee":5,"./data.json":6,"./views/item.coffee":10,"./views/pane.coffee":11,"base":1}],8:[function(require,module,exports){
 (function() {
   var Base, Item, Items, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -1327,5 +1327,31 @@ module.exports=module.exports=[
 }).call(this);
 
 
-},{"../models/item.coffee":8,"base":1}]},{},[7])
+},{"../models/item.coffee":8,"base":1}],10:[function(require,module,exports){
+(function() {
+  var Base, template;
+
+  Base = require('base');
+
+  template = "{{ name }}";
+
+  module.exports = new Base.View(template, true);
+
+}).call(this);
+
+
+},{"base":1}],11:[function(require,module,exports){
+(function() {
+  var Base, template;
+
+  Base = require('base');
+
+  template = "<div class=\"title\">{{ title }}</div>\n<div class=\"items\"></div>";
+
+  module.exports = new Base.View(template, true);
+
+}).call(this);
+
+
+},{"base":1}]},{},[7])
 ;

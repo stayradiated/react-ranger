@@ -10,8 +10,8 @@ Items = require './controllers/items.coffee'
 window.vent = new Base.Event()
 
 window.templates =
-  pane: new Base.View $('#pane-template').html(), true
-  item: new Base.View $('#item-template').html(), true
+  pane: require('./views/pane.coffee')
+  item: require('./views/item.coffee')
 
 window.ranger = new Ranger
   el: $('.ranger')
