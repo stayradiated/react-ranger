@@ -12,6 +12,9 @@
   "bugs": {
     "url": "https://github.com/stayradiated/Ranger/issues"
   },
+  "dependencies": {
+    "base": "git://github.com/stayradiated/Base.git#master"
+  },
   "devDependencies": {
     "node-static": "*",
     "watchify": "*",
