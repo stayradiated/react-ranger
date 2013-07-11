@@ -18,7 +18,6 @@ class App.Models.Item extends Backbone.Model
 		child: false
 
 	initialize: (data) ->
-		console.log '> Creating item', data.name
 		# Load @child as a Pane model
 		return if not data.child?
 		child = new App.Models.Pane(data.child)
@@ -31,7 +30,6 @@ class App.Models.Pane extends Backbone.Model
 		contents: []
 
 	initialize: (data) ->
-		console.log '## Creating pane', data.title
 		# Load @contents as a collection of Items
 		contents = new App.Collections.Items()
 		@set('contents', contents)
@@ -87,9 +85,7 @@ class App.Views.Pane extends Backbone.View
 
 	initialize: ->
 		@active = null
-		console.log '> Creating a new view', @cid
 		@model.on 'remove', =>
-			console.log '-- Removing pane', @model.cid, @model.cid
 			@remove()
 		@model.on('move:up', @up)
 		@model.on('move:down', @down)
@@ -97,7 +93,6 @@ class App.Views.Pane extends Backbone.View
 		@model.get('contents').on('click:item', @select)
 
 	select: (item) =>
-		console.log item.toJSON(), @model.toJSON()
 		vent.trigger('select:pane', @model)
 		@active = @model.get('contents').indexOf(item)
 		@$el.addClass('active')
@@ -159,7 +154,6 @@ class App.Views.Ranger extends Backbone.View
 
 	# Load the items child pane
 	selectItem: (item, pane) =>
-		console.log '> Selecting pane', pane.cid
 		@recheck(pane)
 		childPane = item.get('child')
 		return if childPane is false
