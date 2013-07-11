@@ -30,6 +30,14 @@ class Panes extends Base.Controller
     delete @items
     @unlisten()
 
+  updateScrollbar: =>
+    item = @el.find('.active').get(0)
+    parent = @items.get(0)
+    pos = item.offsetTop
+    scroll = parent.scrollTop
+    offset = 200
+    parent.scrollTop = pos - offset
+
   select: (item) =>
     vent.trigger 'select:pane', @pane 
     @active = @pane.contents.indexOf(item)
@@ -37,6 +45,7 @@ class Panes extends Base.Controller
     @el.find('.active').removeClass('active')
     item.trigger 'select'
     vent.trigger 'select:item', item, @pane
+    @updateScrollbar()
 
   render: =>
     @el.html templates.pane.render @pane.toJSON()

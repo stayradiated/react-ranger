@@ -574,6 +574,7 @@
       this.addOne = __bind(this.addOne, this);
       this.render = __bind(this.render, this);
       this.select = __bind(this.select, this);
+      this.updateScrollbar = __bind(this.updateScrollbar, this);
       this.remove = __bind(this.remove, this);
       Panes.__super__.constructor.apply(this, arguments);
       this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
@@ -598,13 +599,24 @@
       return this.unlisten();
     };
 
+    Panes.prototype.updateScrollbar = function() {
+      var item, offset, parent, pos, scroll;
+      item = this.el.find('.active').get(0);
+      parent = this.items.get(0);
+      pos = item.offsetTop;
+      scroll = parent.scrollTop;
+      offset = 200;
+      return parent.scrollTop = pos - offset;
+    };
+
     Panes.prototype.select = function(item) {
       vent.trigger('select:pane', this.pane);
       this.active = this.pane.contents.indexOf(item);
       this.el.addClass('active');
       this.el.find('.active').removeClass('active');
       item.trigger('select');
-      return vent.trigger('select:item', item, this.pane);
+      vent.trigger('select:item', item, this.pane);
+      return this.updateScrollbar();
     };
 
     Panes.prototype.render = function() {
@@ -817,7 +829,7 @@
 
 
 },{"../controllers/items.coffee":3,"../controllers/panes.coffee":4,"../models/item.coffee":8,"../models/pane.coffee":9,"base":1}],6:[function(require,module,exports){
-module.exports=[
+module.exports=module.exports=[
   {
     "Name": "Chapel Song",
     "AlbumName": "The Art of Flight OST",
@@ -1213,15 +1225,23 @@ module.exports=[
   panes = [['Artists', 'ArtistName'], ['Albums', 'AlbumName'], ['Songs', 'Name']];
 
   document.onkeydown = function(e) {
+    var _ref;
     switch (e.which) {
       case 38:
-        return ranger.up();
+        ranger.up();
+        break;
       case 37:
-        return ranger.left();
+        ranger.left();
+        break;
       case 39:
-        return ranger.right();
+        ranger.right();
+        break;
       case 40:
-        return ranger.down();
+        ranger.down();
+    }
+    if ((37 <= (_ref = e.which) && _ref <= 40)) {
+      e.preventDefault();
+      return false;
     }
   };
 
