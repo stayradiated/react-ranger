@@ -5,21 +5,33 @@ class Items extends Base.Controller
   
   tagName: 'div'
   className: 'item'
-  template: new Base.View $('#item-template').html(), true
 
   events:
     'mousedown': 'click'
   
   constructor: ->
     super
+
     @el = $("<#{@tagName} class=\"#{@className}\">")
     @bind()
-    @item.on 'select', @select
+
+    @listen @item,
+      'select': @select
+
+    @listen @item.collection,
+      'remove': @remove
+
     @el.toggleClass 'hasChild', !!@item.child
 
   render: =>
-    @el.html @template.render @item.toJSON()
+    @el.html templates.item.render @item.toJSON()
     return this
+
+  remove: =>
+    @unbind()
+    @el.remove()
+    delete @el
+    @unlisten()
 
   click: =>
     # Send message to pane view

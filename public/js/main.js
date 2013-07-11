@@ -77,29 +77,48 @@
                 delete attrs.on;
             }
         }
-
+        
+        // Bind an event to a function
+        // Returns an event ID so you can unbind it later
         Event.prototype.on = function (events, fn) {
-            var i, len, event;
+            var ids, id, i, len, event;
             // Allow multiple events to be set at once such as:
             // event.on('update change refresh', this.render);
+            ids = [];
             events = events.split(' ');
             for (i = 0, len = events.length; i < len; i += 1) {
                 event = events[i];
-                if (!this._events[event]) { this._events[event] = []; }
-                this._events[event].push(fn);
+                // If the event has never been listened to before
+                if (!this._events[event]) {
+                    this._events[event] = {};
+                    this._events[event].index = 0;
+                }
+                // Increment the index and assign an ID
+                id = this._events[event].index += 1;
+                this._events[event][id] = fn;
+                ids.push(id);
             }
+            return ids;
         };
 
+        // Trigger an event
         Event.prototype.trigger = function (event) {
-            var args, actions, i, len;
+            var args, actions, i;
             // args is a splat
             args = 2 <= arguments.length ? [].slice.call(arguments, 1) : [];
             actions = this._events[event];
             if (actions) {
-                for (i = 0, len = actions.length; i < len; i += 1) {
-                    actions[i].apply(actions[i], args);
+                for (i in actions) {
+                    if (actions.hasOwnProperty(i) && i !== 'index') {
+                        actions[i].apply(actions[i], args);
+                    }
                 }
             }
+        };
+
+        // Remove a listener from an event
+        Event.prototype.off = function (event, id) {
+          delete this._events[event][id];
         };
 
         return Event;
@@ -120,6 +139,7 @@
             if (!this.events) { this.events = {}; }
             include(this, attrs);
             if (this.el) { this.bind(); }
+            this.listening = [];
         }
 
         // Load Events
@@ -154,6 +174,63 @@
                 }
             }
 
+        };
+
+        Controller.prototype.unbind = function(el) {
+            var selector, query, action, split, name, event;
+
+            // If el is not specified use this.el
+            if (!el) { el = this.el; }
+
+            // Delete elements
+            for (selector in this.elements) {
+                if (this.elements.hasOwnProperty(selector)) {
+                    name = this.elements[selector];
+                    delete this[name];
+                }
+            }
+
+            // Unbind events
+            for (query in this.events) {
+                if (this.events.hasOwnProperty(query)) {
+                    action = this.events[query];
+                    split = query.indexOf(' ') + 1;
+                    event = query.slice(0, split || 9e9);
+                    if (split > 0) {
+                        selector = query.slice(split);
+                        el.off(event, selector);
+                    } else {
+                        el.off(event);
+                    }
+                }
+            }
+
+        };
+
+        Controller.prototype.listen = function (model, attrs) {
+          var event, ids, listener;
+          listener = [model, {}];
+          for (event in attrs) {
+              if (attrs.hasOwnProperty(event)) {
+                  ids = model.on(event, attrs[event]);
+                  listener[1][event] = ids;
+              }
+          }
+          this.listening.push(listener);
+        };
+
+        Controller.prototype.unlisten = function () {
+            var i, len, model, events, event;
+            for (i = 0, len = this.listening.length; i < len; i += 1) {
+                model = this.listening[i][0];
+                events = this.listening[i][1];
+                for (event in events) {
+                    if (events.hasOwnProperty(event)) {
+                        model.off(event, events[event]);
+                    }
+                }
+            }
+            this.listening = [];
         };
 
         return Controller;
@@ -421,8 +498,6 @@
 
     Items.prototype.className = 'item';
 
-    Items.prototype.template = new Base.View($('#item-template').html(), true);
-
     Items.prototype.events = {
       'mousedown': 'click'
     };
@@ -430,17 +505,30 @@
     function Items() {
       this.select = __bind(this.select, this);
       this.click = __bind(this.click, this);
+      this.remove = __bind(this.remove, this);
       this.render = __bind(this.render, this);
       Items.__super__.constructor.apply(this, arguments);
       this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
       this.bind();
-      this.item.on('select', this.select);
+      this.listen(this.item, {
+        'select': this.select
+      });
+      this.listen(this.item.collection, {
+        'remove': this.remove
+      });
       this.el.toggleClass('hasChild', !!this.item.child);
     }
 
     Items.prototype.render = function() {
-      this.el.html(this.template.render(this.item.toJSON()));
+      this.el.html(templates.item.render(this.item.toJSON()));
       return this;
+    };
+
+    Items.prototype.remove = function() {
+      this.unbind();
+      this.el.remove();
+      delete this.el;
+      return this.unlisten();
     };
 
     Items.prototype.click = function() {
@@ -478,8 +566,6 @@
 
     Panes.prototype.className = 'pane';
 
-    Panes.prototype.template = new Base.View($('#pane-template').html(), true);
-
     function Panes() {
       this.right = __bind(this.right, this);
       this.down = __bind(this.down, this);
@@ -492,15 +578,24 @@
       Panes.__super__.constructor.apply(this, arguments);
       this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
       this.active = null;
-      this.pane.on('remove', this.remove);
-      this.pane.on('move:up', this.up);
-      this.pane.on('move:down', this.down);
-      this.pane.on('move:right', this.right);
-      this.pane.contents.on('click:item', this.select);
+      this.listen(this.pane, {
+        'remove': this.remove,
+        'move:up': this.up,
+        'move:down': this.down,
+        'move:right': this.right
+      });
+      this.listen(this.pane.contents, {
+        'click:item': this.select
+      });
     }
 
     Panes.prototype.remove = function() {
-      return this.el.remove();
+      this.pane.contents.trigger('remove');
+      this.unbind();
+      this.el.remove();
+      delete this.el;
+      delete this.items;
+      return this.unlisten();
     };
 
     Panes.prototype.select = function(item) {
@@ -513,7 +608,7 @@
     };
 
     Panes.prototype.render = function() {
-      this.el.html(this.template.render(this.pane.toJSON()));
+      this.el.html(templates.pane.render(this.pane.toJSON()));
       this.items = this.el.find('.items');
       this.pane.contents.forEach(this.addOne);
       return this;
@@ -1103,6 +1198,11 @@ module.exports=module.exports=[
   Items = require('./controllers/items.coffee');
 
   window.vent = new Base.Event();
+
+  window.templates = {
+    pane: new Base.View($('#pane-template').html(), true),
+    item: new Base.View($('#item-template').html(), true)
+  };
 
   window.ranger = new Ranger({
     el: $('.ranger')

@@ -9,6 +9,10 @@ Items = require './controllers/items.coffee'
 # Global event passer
 window.vent = new Base.Event()
 
+window.templates =
+  pane: new Base.View $('#pane-template').html(), true
+  item: new Base.View $('#item-template').html(), true
+
 window.ranger = new Ranger
   el: $('.ranger')
 

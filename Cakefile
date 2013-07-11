@@ -5,7 +5,7 @@ fs = require 'fs'
 
 # Configuration
 input = 'source/main.coffee'
-output = 'public/main.js'
+output = 'public/js/main.js'
 publicFolder = './public'
 
 option '-p', '--port [port]', 'Set port for cake server'

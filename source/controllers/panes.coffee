@@ -7,20 +7,28 @@ class Panes extends Base.Controller
 
   tagName: 'section'
   className: 'pane'
-  template: new Base.View $('#pane-template').html(), true
 
   constructor: ->
     super
     @el = $("<#{@tagName} class=\"#{@className}\">")
     @active = null
-    @pane.on 'remove', @remove
-    @pane.on 'move:up', @up
-    @pane.on 'move:down', @down
-    @pane.on 'move:right', @right
-    @pane.contents.on 'click:item', @select
+    
+    @listen @pane,
+      'remove':     @remove
+      'move:up':    @up
+      'move:down':  @down
+      'move:right': @right
+
+    @listen @pane.contents,
+      'click:item': @select
 
   remove: =>
+    @pane.contents.trigger('remove')
+    @unbind()
     @el.remove()
+    delete @el
+    delete @items
+    @unlisten()
 
   select: (item) =>
     vent.trigger 'select:pane', @pane 
@@ -31,7 +39,7 @@ class Panes extends Base.Controller
     vent.trigger 'select:item', item, @pane
 
   render: =>
-    @el.html @template.render @pane.toJSON()
+    @el.html templates.pane.render @pane.toJSON()
     @items = @el.find('.items')
     @pane.contents.forEach(@addOne)
     return this
