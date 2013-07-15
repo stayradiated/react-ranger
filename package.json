@@ -2,7 +2,7 @@
   "name": "Ranger",
   "version": "0.0.1",
   "description": "A column browser for browsers",
-  "main": "index.html",
+  "main": "bin/controllers/ranger.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/stayradiated/Ranger.git"
