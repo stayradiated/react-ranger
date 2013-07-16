@@ -1,6 +1,6 @@
 
 Base = require 'base'
-Item = require '../models/item.coffee'
+Item = require '../models/item'
 
 class Pane extends Base.Model
 

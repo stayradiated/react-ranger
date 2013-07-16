@@ -1,6 +1,6 @@
 
 Base = require 'base'
-Items = require('../controllers/items.coffee')()
+Items = require('../controllers/items')()
 
 vent = null
 template = null

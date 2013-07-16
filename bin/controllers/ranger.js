@@ -10,17 +10,17 @@
   vent = new Base.Event();
 
   template = {
-    pane: require('../views/pane.coffee'),
-    item: require('../views/item.coffee')
+    pane: require('../views/pane'),
+    item: require('../views/item')
   };
 
-  Panes = require('../controllers/panes.coffee')(vent, template.pane);
+  Panes = require('../controllers/panes')(vent, template.pane);
 
-  Items = require('../controllers/items.coffee')(vent, template.item);
+  Items = require('../controllers/items')(vent, template.item);
 
-  Pane = require('../models/pane.coffee');
+  Pane = require('../models/pane');
 
-  Item = require('../models/item.coffee');
+  Item = require('../models/item');
 
   Ranger = (function(_super) {
     __extends(Ranger, _super);
@@ -33,6 +33,7 @@
       this.up = __bind(this.up, this);
       this.selectFirst = __bind(this.selectFirst, this);
       this.loadRaw = __bind(this.loadRaw, this);
+      this.remove = __bind(this.remove, this);
       this.addOne = __bind(this.addOne, this);
       this.recheck = __bind(this.recheck, this);
       this.selectItem = __bind(this.selectItem, this);
@@ -44,6 +45,7 @@
       };
       this.panes = new Pane();
       this.panes.on('create:model show', this.addOne);
+      this.panes.on('destroy:model', this.remove);
       vent.on('select:item', this.selectItem);
       vent.on('select:pane', this.selectPane);
     }
@@ -79,6 +81,10 @@
         pane: pane
       });
       return this.el.append(view.render().el);
+    };
+
+    Ranger.prototype.remove = function(pane) {
+      return console.log(pane);
     };
 
     Ranger.prototype.loadRaw = function(array, panes) {

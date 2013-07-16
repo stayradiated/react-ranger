@@ -11,7 +11,7 @@ class Item extends Base.Model
   constructor: (attrs) ->
     super
     return unless attrs.child?
-    Pane = require('../models/pane.coffee')::model
+    Pane = require('../models/pane')::model
     @child = new Pane(attrs.child)
     @child.parent = this
 

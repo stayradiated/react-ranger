@@ -6,14 +6,14 @@ vent = new Base.Event()
 
 # Templates
 template =
-  pane: require('../views/pane.coffee')
-  item: require('../views/item.coffee')
+  pane: require('../views/pane')
+  item: require('../views/item')
 
 # Controllers and Models
-Panes = require('../controllers/panes.coffee')(vent, template.pane)
-Items = require('../controllers/items.coffee')(vent, template.item)
-Pane = require '../models/pane.coffee'
-Item = require '../models/item.coffee'
+Panes = require('../controllers/panes')(vent, template.pane)
+Items = require('../controllers/items')(vent, template.item)
+Pane = require '../models/pane'
+Item = require '../models/item'
 
 
 class Ranger extends Base.Controller
@@ -25,6 +25,7 @@ class Ranger extends Base.Controller
       item: null
     @panes = new Pane()
     @panes.on 'create:model show', @addOne
+    @panes.on 'destroy:model', @remove
     vent.on 'select:item', @selectItem
     vent.on 'select:pane', @selectPane
   
@@ -51,9 +52,13 @@ class Ranger extends Base.Controller
   addOne: (pane) =>
     view = new Panes( pane: pane )
     @el.append view.render().el
+
+  remove: (pane) =>
+    console.log pane
   
   # Load an array of objects
   loadRaw: (array, panes) =>
+    # @panes.get(0).destroy()
     map = {}
     main = {}
     length = panes.length - 1

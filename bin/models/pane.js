@@ -6,7 +6,7 @@
 
   Base = require('base');
 
-  Item = require('../models/item.coffee');
+  Item = require('../models/item');
 
   Pane = (function(_super) {
     __extends(Pane, _super);

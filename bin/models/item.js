@@ -21,7 +21,7 @@
       if (attrs.child == null) {
         return;
       }
-      Pane = require('../models/pane.coffee').prototype.model;
+      Pane = require('../models/pane').prototype.model;
       this.child = new Pane(attrs.child);
       this.child.parent = this;
     }
