@@ -308,7 +308,8 @@
     };
 
     Ranger.prototype.remove = function(pane) {
-      return pane.trigger('remove');
+      pane.trigger('remove');
+      return this.recheck(pane);
     };
 
     Ranger.prototype.loadRaw = function(array, panes) {
@@ -521,7 +522,7 @@
 }).call(this);
 
 },{"base":10}],8:[function(require,module,exports){
-module.exports=[
+module.exports=module.exports=[
   {
     "Name": "Chapel Song",
     "AlbumName": "The Art of Flight OST",

@@ -84,7 +84,8 @@
     };
 
     Ranger.prototype.remove = function(pane) {
-      return pane.trigger('remove');
+      pane.trigger('remove');
+      return this.recheck(pane);
     };
 
     Ranger.prototype.loadRaw = function(array, panes) {

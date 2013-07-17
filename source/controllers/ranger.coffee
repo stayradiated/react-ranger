@@ -54,8 +54,10 @@ class Ranger extends Base.Controller
     @el.append view.render().el
 
   # Destroying the view of a pane when the model is destroyed
+  # Also destroy all child views
   remove: (pane) =>
     pane.trigger 'remove'
+    @recheck(pane)
   
   # Load an array of objects
   loadRaw: (array, panes) =>
