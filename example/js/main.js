@@ -269,7 +269,7 @@
       };
       this.panes = new Pane();
       this.panes.on('create:model show', this.addOne);
-      this.panes.on('destroy:model', this.remove);
+      this.panes.on('before:destroy:model', this.remove);
       vent.on('select:item', this.selectItem);
       vent.on('select:pane', this.selectPane);
     }
@@ -308,11 +308,14 @@
     };
 
     Ranger.prototype.remove = function(pane) {
-      return console.log(pane);
+      return pane.trigger('remove');
     };
 
     Ranger.prototype.loadRaw = function(array, panes) {
       var i, id, item, key, length, main, map, out, title, x, _base, _i, _j, _len, _len1, _ref;
+      if (this.panes.length > 0) {
+        this.panes.get(0).destroy();
+      }
       map = {};
       main = {};
       length = panes.length - 1;
@@ -518,7 +521,7 @@
 }).call(this);
 
 },{"base":10}],8:[function(require,module,exports){
-module.exports=module.exports=[
+module.exports=[
   {
     "Name": "Chapel Song",
     "AlbumName": "The Art of Flight OST",
@@ -905,6 +908,31 @@ module.exports=module.exports=[
   ];
 
   ranger.loadRaw(items, panes);
+
+  window.stressTest = function () {
+    var state = true;
+    var i = 0;
+    var count = 100;
+    var repeat = function() {
+      console.log('refresh', i, state);
+      if (state) {
+        state = false;
+        panes = [
+          ['Artists', 'ArtistName'],
+          ['Songs', 'Name']
+        ];
+      } else {
+        state = true;
+        panes = [
+          ['Albums', 'AlbumName'],
+          ['Songs', 'Name']
+        ];
+      }
+      ranger.loadRaw(items, panes);
+      if (i++ < count) { setTimeout(repeat, 1000); }
+    };
+    repeat();
+  };
 
   openItem = function () {
     var item = ranger.open();

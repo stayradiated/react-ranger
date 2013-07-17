@@ -25,7 +25,7 @@ class Ranger extends Base.Controller
       item: null
     @panes = new Pane()
     @panes.on 'create:model show', @addOne
-    @panes.on 'destroy:model', @remove
+    @panes.on 'before:destroy:model', @remove
     vent.on 'select:item', @selectItem
     vent.on 'select:pane', @selectPane
   
@@ -53,12 +53,17 @@ class Ranger extends Base.Controller
     view = new Panes( pane: pane )
     @el.append view.render().el
 
+  # Destroying the view of a pane when the model is destroyed
   remove: (pane) =>
-    console.log pane
+    pane.trigger 'remove'
   
   # Load an array of objects
   loadRaw: (array, panes) =>
-    # @panes.get(0).destroy()
+
+    # You can only have one top level pane at a time
+    if @panes.length > 0
+      @panes.get(0).destroy()
+
     map = {}
     main = {}
     length = panes.length - 1

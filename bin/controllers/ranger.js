@@ -45,7 +45,7 @@
       };
       this.panes = new Pane();
       this.panes.on('create:model show', this.addOne);
-      this.panes.on('destroy:model', this.remove);
+      this.panes.on('before:destroy:model', this.remove);
       vent.on('select:item', this.selectItem);
       vent.on('select:pane', this.selectPane);
     }
@@ -84,11 +84,14 @@
     };
 
     Ranger.prototype.remove = function(pane) {
-      return console.log(pane);
+      return pane.trigger('remove');
     };
 
     Ranger.prototype.loadRaw = function(array, panes) {
       var i, id, item, key, length, main, map, out, title, x, _base, _i, _j, _len, _len1, _ref;
+      if (this.panes.length > 0) {
+        this.panes.get(0).destroy();
+      }
       map = {};
       main = {};
       length = panes.length - 1;
