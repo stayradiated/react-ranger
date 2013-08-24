@@ -12,7 +12,7 @@
 
 /* Main App */
 .ranger {
-  font-family: "Open Sans";
+  font-family: "Open Sans", "Helvetica", sans-serif;
   background: #eeeeee;
 
   /* Temp styles to take up entire page */

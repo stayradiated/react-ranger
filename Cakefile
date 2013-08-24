@@ -4,42 +4,24 @@ http = require 'http'
 fs = require 'fs'
 
 # Configuration
-source = 'source'
-bin = 'bin'
-exampleInput = 'example/js/init.js'
-exampleOutput = 'example/js/main.js'
-publicFolder = './example'
+INIT = 'bin/controllers/ranger.js'
+OUT = 'bin/ranger.js'
+IGNORE = 'swig'
 
-option '-p', '--port [port]', 'Set port for cake server'
 option '-w', '--watch', 'Watch the folder for changes'
 
-
-compileCoffee = (options) ->
-
-  # Arguments
-  args = ['-o', bin, source]
-
-  # Build or Watch
-  if options.watch
-    args.unshift '-w'
-
-  # Start coffee
-  terminal = spawn('coffee', args)
-  terminal.stdout.on 'data', (data) -> console.log(data.toString())
-  terminal.stderr.on 'data', (data) -> console.log(data.toString())
-
-
-browserify = (options) ->
+build = (options) ->
 
   # Modules
   watchify = './node_modules/watchify/bin/cmd.js'
   browserify = './node_modules/browserify/bin/cmd.js'
 
-  args = [exampleInput, '-o', exampleOutput]
+  args = [INIT, '--ignore', IGNORE, '--outfile', OUT]
 
   # Build or Watch
   if options.watch
     cmd = watchify
+    args.push '-v'
   else
     cmd = browserify
 
@@ -47,36 +29,8 @@ browserify = (options) ->
 
   # Start browserify
   browserify = spawn(cmd, args)
-  browserify.stdout.on 'data', (data) -> console.log(data.toString())
-  browserify.stderr.on 'data', (data) -> console.log(data.toString())
-  browserify.on 'error', (data) -> console.log(data.toString())
-  browserify.on 'exit', (data) -> console.log(data.toString())
+  browserify.stdout.on 'data', (data) -> console.log(data.toString()[0...-1])
+  browserify.stderr.on 'data', (data) -> console.log(data.toString()[0...-1])
 
-
-task 'server', 'Start server', (options) ->
-
-  # Set port
-  port = options.port or 9294
-
-  compileCoffee(options)
-  browserify(options)
-
-  # Run http server on localhost:9294
-  file= new(node_static.Server)(publicFolder)
-
-  server = http.createServer (req, res) ->
-
-    req.addListener( 'end', ->
-      file.serve(req, res)
-    ).resume()
-
-  server.listen port
-
-  console.log 'Server started on ' + port
-
-
-task 'build', 'Compile coffeescript', (options) ->
- compileCoffee(options)
-
-task 'build_example', 'Build example', (options) ->
-  browserify(options)
+task 'build', 'Merge JS files into ranger.js', (options) ->
+  build(options)

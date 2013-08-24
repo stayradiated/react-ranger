@@ -1,4 +1,4 @@
-[
+window.items = [
   {
     "Name": "Chapel Song",
     "AlbumName": "The Art of Flight OST",
@@ -364,4 +364,4 @@
     "AlbumName": "Ritual Union",
     "ArtistName": "Little Dragon"
   }
-]
+];
