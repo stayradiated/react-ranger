@@ -19,6 +19,7 @@
     "node-static": "*",
     "watchify": "*",
     "browserify": "*",
-    "caching-coffeeify": "*"
+    "caching-coffeeify": "*",
+    "uglify-js": "*"
   }
 }
