@@ -6,6 +6,7 @@ fs = require 'fs'
 # Configuration
 INIT = 'bin/controllers/ranger.js'
 OUT = 'bin/ranger.js'
+IGNORE = 'swig'
 
 option '-w', '--watch', 'Watch the folder for changes'
 
@@ -15,11 +16,12 @@ build = (options) ->
   watchify = './node_modules/watchify/bin/cmd.js'
   browserify = './node_modules/browserify/bin/cmd.js'
 
-  args = [INIT, '-o', OUT, '-v']
+  args = [INIT, '--ignore', IGNORE, '--outfile', OUT]
 
   # Build or Watch
   if options.watch
     cmd = watchify
+    args.push '-v'
   else
     cmd = browserify
 
