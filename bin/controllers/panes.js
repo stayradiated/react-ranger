@@ -1,10 +1,14 @@
 (function () {
 
-  var Base, Items, Panes, template, vent,
+  var Base, Items, Panes, template, vent, SCROLL_OFFSET, SCROLL_HEIGHT,
     bind = function (fn, me){ return function (){ return fn.apply(me, arguments); }; };
 
   Base = require('base');
   Items = require('../controllers/items')();
+
+  // Constants
+  SCROLL_OFFSET = 20;
+  SCROLL_HEIGHT = 50;
 
   // Set globals
   module.exports = function (vnt, tmpl) {
@@ -57,13 +61,17 @@
     },
 
     updateScrollbar: function () {
-      var item, offset, parent, pos, scroll;
-      item = this.el.find('.active').get(0);
+      var item, offset, parent, height, pos, scroll;
+      item   = this.el.find('.active').get(0);
       parent = this.items.get(0);
-      pos = item.offsetTop;
+      height = parent.offsetHeight;
+      pos    = item.offsetTop;
       scroll = parent.scrollTop;
-      offset = 200;
-      parent.scrollTop = pos - offset;
+      if (pos - scroll < SCROLL_OFFSET) {
+        parent.scrollTop = pos - SCROLL_OFFSET;
+      } else if (pos + SCROLL_HEIGHT > scroll + height - SCROLL_OFFSET) {
+        parent.scrollTop = pos - height + SCROLL_HEIGHT + SCROLL_OFFSET;
+      }
     },
 
     select: function (item) {
