@@ -1,14 +1,9 @@
-
 (function() {
-
-  var Base = require('base');
-  var Ranger = require('../../bin/controllers/ranger');
 
   window.ranger = new Ranger({
     el: $('.ranger')
   });
 
-  var items = require('./data.json');
   var panes = [
     ['Artists', 'ArtistName'],
     ['Albums', 'AlbumName'],
