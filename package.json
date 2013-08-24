@@ -1,6 +1,6 @@
 {
   "name": "ranger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A column browser for browsers",
   "main": "bin/controllers/ranger.js",
   "repository": {
