@@ -1,4 +1,4 @@
-;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function () {
 
   var Base, Items, template, vent,
@@ -216,7 +216,7 @@
 }());
 
 },{"../controllers/items":1,"base":8}],3:[function(require,module,exports){
-var process=require("__browserify_process");(function() {
+(function(process){(function() {
 
   var Base, Item, Items, Pane, Panes, Ranger, template, vent,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -410,6 +410,7 @@ var process=require("__browserify_process");(function() {
 
 }());
 
+})(require("__browserify_process"))
 },{"../controllers/items":1,"../controllers/panes":2,"../models/item":4,"../models/pane":5,"../views/item":6,"../views/pane":7,"__browserify_process":10,"base":8}],4:[function(require,module,exports){
 (function () {
 
@@ -517,7 +518,7 @@ var process=require("__browserify_process");(function() {
 }());
 
 },{"base":8}],8:[function(require,module,exports){
-/*jslint nomen: true*/
+(function(){/*jslint nomen: true*/
 /*global window, require, module*/
 
 (function () {
@@ -1005,6 +1006,7 @@ var process=require("__browserify_process");(function() {
 
 }());
 
+})()
 },{"swig":9}],9:[function(require,module,exports){
 
 },{}],10:[function(require,module,exports){

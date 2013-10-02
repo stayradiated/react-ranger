@@ -77,7 +77,7 @@ class Ranger extends Base.Controller
         out.title = title
         out.contents ?= []
         if map[x] is undefined
-          id = out.contents.push( name: item[key] ) - 1
+          id = out.contents.push( title: item[key] ) - 1
           map[x] = out.contents[id]
         if i isnt length then out = map[x].child ?= {}
         else map[x].data = item

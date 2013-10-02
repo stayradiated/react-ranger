@@ -2,6 +2,6 @@
 
 Base = require 'base'
 
-template = "{{ name }}"
+template = "{{ title }}"
 
 module.exports = new Base.View(template, true)

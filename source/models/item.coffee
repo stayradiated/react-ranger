@@ -4,7 +4,7 @@ Base = require 'base'
 class Item extends Base.Model
 
   defaults:
-    name: ''
+    title: ''
     child: false
     data: false
 
