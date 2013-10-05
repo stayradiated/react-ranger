@@ -16,6 +16,10 @@
     "base": "git://github.com/stayradiated/Base.git#master"
   },
   "devDependencies": {
-    "coffee-scrunch": "*"
+    "node-static": "*",
+    "watchify": "*",
+    "browserify": "*",
+    "caching-coffeeify": "*",
+    "uglify-js": "*"
   }
 }
