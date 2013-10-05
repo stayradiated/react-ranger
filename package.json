@@ -14,5 +14,8 @@
   },
   "dependencies": {
     "base": "git://github.com/stayradiated/Base.git#master"
+  },
+  "devDependencies": {
+    "coffee-scrunch": ">=0.1.0"
   }
 }
