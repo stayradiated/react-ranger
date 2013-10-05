@@ -1,36 +1,27 @@
-{spawn} = require 'child_process'
-node_static = require 'node-static'
-http = require 'http'
+###
+
 fs = require 'fs'
+Scrunch = require 'coffee-scrunch'
 
 # Configuration
-INIT = 'bin/controllers/ranger.js'
-OUT = 'bin/ranger.js'
-IGNORE = 'swig'
+input = 'source/controllers/ranger.coffee'
+output = 'bin/ranger.js'
 
-option '-w', '--watch', 'Watch the folder for changes'
+scrunch = new Scrunch
+  path: input
+  compile: true
+  watch: true
+  verbose: true
 
 build = (options) ->
 
-  # Modules
-  watchify = './node_modules/watchify/bin/cmd.js'
-  browserify = './node_modules/browserify/bin/cmd.js'
+scrunch.vent.on 'run', ->
+  scrunch.compile()
 
-  args = [INIT, '--ignore', IGNORE, '--outfile', OUT]
+scrunch.vent.on 'compile', (data) ->
+  fs.writeFile output, data
 
-  # Build or Watch
-  if options.watch
-    cmd = watchify
-    args.push '-v'
-  else
-    cmd = browserify
-
-  console.log cmd, args.join(' ')
-
-  # Start browserify
-  browserify = spawn(cmd, args)
-  browserify.stdout.on 'data', (data) -> console.log(data.toString()[0...-1])
-  browserify.stderr.on 'data', (data) -> console.log(data.toString()[0...-1])
+scrunch.run()
+###
 
 task 'build', 'Merge JS files into ranger.js', (options) ->
-  build(options)
