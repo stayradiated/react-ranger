@@ -30,6 +30,10 @@
   })([
     [
       {
+        /*
+          /Users/Admin/Projects/Ranger/lib/controllers/ranger.js
+        */
+
         'base': 1,
         '../common': 2,
         '../views/pane': 3,
@@ -257,7 +261,12 @@
       ;
       }
     ], [
-      {}, function(require, module, exports) {
+      {
+        /*
+          /Users/Admin/Projects/Ranger/node_modules/base/index.js
+        */
+
+      }, function(require, module, exports) {
         /*jslint node: true, nomen: true*/
       
       (function () {
@@ -702,7 +711,12 @@
       ;
       }
     ], [
-      {}, function(require, module, exports) {
+      {
+        /*
+          /Users/Admin/Projects/Ranger/lib/common.js
+        */
+
+      }, function(require, module, exports) {
         (function () {
       
           'use strict';
@@ -719,7 +733,12 @@
       ;
       }
     ], [
-      {}, function(require, module, exports) {
+      {
+        /*
+          /Users/Admin/Projects/Ranger/lib/views/pane.js
+        */
+
+      }, function(require, module, exports) {
         (function () {
       
           'use strict';
@@ -732,7 +751,12 @@
       ;
       }
     ], [
-      {}, function(require, module, exports) {
+      {
+        /*
+          /Users/Admin/Projects/Ranger/lib/views/item.js
+        */
+
+      }, function(require, module, exports) {
         (function () {
       
           'use strict';
@@ -746,6 +770,10 @@
       }
     ], [
       {
+        /*
+          /Users/Admin/Projects/Ranger/lib/controllers/panes.js
+        */
+
         'base': 1,
         '../controllers/items': 6,
         '../common': 2
@@ -901,6 +929,10 @@
       }
     ], [
       {
+        /*
+          /Users/Admin/Projects/Ranger/lib/controllers/items.js
+        */
+
         'base': 1,
         '../common': 2
       }, function(require, module, exports) {
@@ -985,6 +1017,10 @@
       }
     ], [
       {
+        /*
+          /Users/Admin/Projects/Ranger/lib/models/pane.js
+        */
+
         'base': 1,
         '../models/item': 8
       }, function(require, module, exports) {
@@ -1031,6 +1067,10 @@
       }
     ], [
       {
+        /*
+          /Users/Admin/Projects/Ranger/lib/models/item.js
+        */
+
         'base': 1,
         '../models/pane': 7
       }, function(require, module, exports) {
