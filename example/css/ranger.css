@@ -29,17 +29,17 @@
 .ranger .pane {
   position: relative;;
   float: left;
-  width: 300px;
+  width: 33%;
   height: 100%;
 }
 
 /* Pane Items */
 .ranger .pane .items {
   position: absolute;
-  width: 300px;
   top: 50px;
   bottom: 0;
   overflow-y: auto;
+  width: 100%;
 }
 
 /* Pane Title */
