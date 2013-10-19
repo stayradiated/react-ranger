@@ -31,7 +31,7 @@
     [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/controllers/ranger.js
+          /home/stayrad/Projects/Ranger/lib/controllers/ranger.js
         */
 
         'base': 1,
@@ -70,7 +70,7 @@
           Pane  = require('../models/pane');
           Item  = require('../models/item');
       
-          Ranger = Base.Controller.extend({
+          Ranger = Base.View.extend({
       
               constructor: function () {
       
@@ -263,7 +263,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/node_modules/base/index.js
+          /home/stayrad/Projects/Ranger/node_modules/base/index.js
         */
 
       }, function(require, module, exports) {
@@ -272,7 +272,7 @@
       (function () {
           'use strict';
       
-          var include, extend, inherit, Module, Controller, Event, Model, Collection;
+          var include, extend, inherit, View, Event, Model, Collection;
       
           // Copy object properties
           include = function (to, from) {
@@ -317,48 +317,6 @@
               return child;
           };
       
-          /*
-           * MODULE
-           *
-           * Module magic taken from Spine
-           */
-      
-          Module = {
-      
-              includes: function (obj) {
-                  var key;
-                  if (!obj) {
-                      throw new Error('include(obj) requires obj');
-                  }
-                  for (key in obj) {
-                      if (obj.hasOwnProperty(key) && key !== 'included' && key !== 'extended') {
-                          this.prototype[key] = obj[key];
-                      }
-                  }
-                  if (obj.hasOwnProperty('included')) {
-                      obj.included.apply(this);
-                  }
-                  return this;
-              },
-      
-              extends: function (obj) {
-                  var key;
-                  if (!obj) {
-                      throw new Error('extend(obj) requires obj');
-                  }
-                  for (key in obj) {
-                      if (obj.hasOwnProperty(key) && key !== 'included' && key !== 'extended') {
-                          this[key] = obj[key];
-                      }
-                  }
-                  if (obj.hasOwnProperty('extended')) {
-                      obj.extended.apply(this);
-                  }
-                  return this;
-              }
-      
-          };
-      
       
           /*
            * EVENT
@@ -367,26 +325,18 @@
           Event = (function () {
       
               function Event(attrs) {
-                  var key;
                   this._events = {};
                   this._listening = [];
-                  // Bind events specified in attrs
-                  if (attrs && attrs.on) {
-                      for (key in attrs.on) {
-                          if (attrs.on.hasOwnProperty(key)) {
-                              this.on(key, attrs.on[key]);
-                          }
-                      }
-                      delete attrs.on;
-                  }
               }
-      
-              include(Event, Module);
       
               // Bind an event to a function
               // Returns an event ID so you can unbind it later
               Event.prototype.on = function (events, fn) {
                   var ids, id, i, len, event;
+                  if (typeof fn !== 'function') {
+                      throw new Error('fn not function');
+                  }
+      
                   // Allow multiple events to be set at once such as:
                   // event.on('update change refresh', this.render);
                   ids = [];
@@ -403,14 +353,20 @@
                       this._events[event][id] = fn;
                       ids.push(id);
                   }
+      
                   return ids;
               };
       
               // Trigger an event
               Event.prototype.trigger = function (event) {
                   var args, actions, i;
-                  // args is a splat
                   args = 2 <= arguments.length ? [].slice.call(arguments, 1) : [];
+      
+                  // Listen to all events
+                  if (event !== '*') {
+                      this.trigger('*', event, args);
+                  }
+      
                   actions = this._events[event];
                   if (actions) {
                       for (i in actions) {
@@ -422,15 +378,18 @@
               };
       
               // Remove a listener from an event
-              Event.prototype.off = function (event, id) {
+              Event.prototype.off = function (events, id) {
                   var i, len;
                   if (Array.isArray(id)) {
                       for (i = 0, len = id.length; i < len; i += 1) {
-                          this.off(event, id[i]);
+                          this.off(events, id[i]);
                       }
                       return;
                   }
-                  delete this._events[event][id];
+                  events = events.split(' ');
+                  for (i = 0, len = events.length; i < len; i += 1) {
+                      delete this._events[events[i]][id];
+                  }
               };
       
               /**
@@ -495,24 +454,32 @@
       
       
           /*
-           * CONTROLLER
+           * VIEW
            */
       
-          Controller = (function () {
+          View = (function () {
       
-              function Controller(attrs) {
-                  Controller.__super__.constructor.apply(this, arguments);
-                  if (!this.elements) { this.elements = {}; }
-                  if (!this.events) { this.events = {}; }
+              function View(attrs) {
+                  View.__super__.constructor.apply(this, arguments);
                   include(this, attrs);
-                  if (this.el) { this.bind(); }
+      
+                  if (!this.elements) {
+                      this.elements = {};
+                  }
+      
+                  if (!this.events) {
+                      this.events = {};
+                  }
+      
+                  if (this.el) {
+                      this.bind();
+                  }
               }
       
               // Load Events
-              inherit(Controller, Event);
-              include(Controller, Module);
+              inherit(View, Event);
       
-              Controller.prototype.bind = function (el) {
+              View.prototype.bind = function (el) {
                   var selector, query, action, split, name, event;
       
                   // If el is not specified use this.el
@@ -543,7 +510,7 @@
       
               };
       
-              Controller.prototype.unbind = function (el) {
+              View.prototype.unbind = function (el) {
                   var selector, query, action, split, name, event;
       
                   // If el is not specified use this.el
@@ -574,7 +541,14 @@
       
               };
       
-              return Controller;
+              // Unbind the view and remove the element
+              View.prototype.release = function () {
+                  this.unbind();
+                  this.el.remove();
+                  this.stopListening();
+              };
+      
+              return View;
       
           }());
       
@@ -598,20 +572,14 @@
                   include(this._data, attrs);
       
                   set = function (key) {
-                      // Encapture key
                       return function (value) {
-                          // Don't do anything if the value doesn't change
-                          if (value === self._data[key]) { return; }
-                          self._data[key] = value;
-                          self.trigger('change', key, value);
-                          self.trigger('change:' + key, value);
+                          return self.set.call(self, key, value);
                       };
                   };
       
                   get = function (key) {
-                      // Encapture key
                       return function () {
-                          return self._data[key];
+                          return self.get(key);
                       };
                   };
       
@@ -626,7 +594,28 @@
       
               // Load Events
               inherit(Model, Event);
-              include(Model, Module);
+      
+              // Change a value
+              Model.prototype.set = function (key, value, options) {
+                  if (!this.defaults.hasOwnProperty(key)) {
+                      this[key] = value;
+                      return value;
+                  }
+                  if (value === this._data[key]) { return; }
+                  this._data[key] = value;
+                  if (!options || !options.silent) {
+                      this.trigger('change', key, value);
+                      this.trigger('change:' + key, value);
+                  }
+              };
+      
+              // Get a value
+              Model.prototype.get = function (key) {
+                  if (this.defaults.hasOwnProperty(key)) {
+                      return this._data[key];
+                  }
+                  return this[key];
+              };
       
               // Load data into the model
               Model.prototype.refresh = function (data, replace) {
@@ -648,8 +637,18 @@
               };
       
               // Convert the class instance into a simple object
-              Model.prototype.toJSON = function () {
-                  return this._data;
+              Model.prototype.toJSON = function (strict) {
+                  var key, json;
+                  if (strict) {
+                      for (key in this.defaults) {
+                          if (this.defaults.hasOwnProperty(key)) {
+                              json[key] = this._data[key];
+                          }
+                      }
+                  } else {
+                      json = this._data;
+                  }
+                  return json;
               };
       
       
@@ -674,7 +673,11 @@
       
               // Load Events
               inherit(Collection, Event);
-              include(Collection, Module);
+      
+              // Access all models
+              Collection.prototype.all = function () {
+                  return this._models;
+              };
       
               // Create a new instance of the model and add it to the collection
               Collection.prototype.create = function (attrs, options) {
@@ -689,8 +692,13 @@
                   var id, index, self = this;
       
                   // Set ID
-                  id = model.id = 'c-' + this._index;
-                  this._index += 1;
+                  if (model.id) {
+                      id = model.id;
+                  } else {
+                      id = 'c-' + this._index;
+                      this._index += 1;
+                      model.set('id', id, {silent: true});
+                  }
       
                   // Add to collection
                   model.collection = this;
@@ -700,14 +708,12 @@
       
                   // Bubble events
                   this.listen(model, {
-                      'change': function (key, value) {
-                          self.trigger('change:model', model, key, value);
+                      '*': function (event, args) {
+                          args = args.slice(0);
+                          args.unshift(event + ':model', model);
+                          self.trigger.apply(self, args);
                       },
                       'before:destroy': function () {
-                          self.trigger('before:destroy:model', model);
-                      },
-                      'destroy': function () {
-                          self.trigger('destroy:model', model);
                           self.remove(model);
                       }
                   });
@@ -715,6 +721,7 @@
                   // Only trigger create if silent is not set
                   if (!options || !options.silent) {
                       this.trigger('create:model', model);
+                      this.trigger('change');
                   }
       
               };
@@ -727,6 +734,7 @@
                   delete this._lookup[model.id];
                   this.length -= 1;
                   this.stopListening(model);
+                  this.trigger('remove:model');
                   this.trigger('change');
               };
       
@@ -736,6 +744,7 @@
                   this._models.splice(index, 1);
                   this._models.splice(pos, 0, model);
                   this._lookup[model.id] = index;
+                  this.trigger('change:order');
                   this.trigger('change');
               };
       
@@ -755,7 +764,17 @@
       
               // Loop over each record in the collection
               Collection.prototype.forEach = function () {
-                  this._models.forEach.apply(this._models, arguments);
+                  return this._models.forEach.apply(this._models, arguments);
+              };
+      
+              // Filter the models
+              Collection.prototype.filter = function () {
+                  return this._models.filter.apply(this._models, arguments);
+              };
+      
+              // Sort the models. Does not alter original order
+              Collection.prototype.sort = function () {
+                  return this._models.sort.apply(this._models, arguments);
               };
       
               // Get the index of the item
@@ -770,9 +789,8 @@
               // Convert the collection into an array of objects
               Collection.prototype.toJSON = function () {
                   var i, id, len, record, results = [];
-                  for (i = 0, len = this._order.length; i < len; i += 1) {
-                      id = this._order[i];
-                      record = this._models[id];
+                  for (i = 0, len = this._models.length; i < len; i += 1) {
+                      record = this._models[i];
                       results.push(record.toJSON());
                   }
                   return results;
@@ -799,17 +817,22 @@
                   return this._models[index];
               };
       
+              // Check if a model exists in the collection
+              Collection.prototype.exists = function (model) {
+                  return this.indexOf(model) > -1;
+              };
+      
               return Collection;
       
           }());
       
           // Add the extend to method to all classes
-          Event.extend = Controller.extend = Model.extend = Collection.extend = extend;
+          Event.extend = View.extend = Model.extend = Collection.extend = extend;
       
           // Export all the classes
           module.exports = {
               Event: Event,
-              Controller: Controller,
+              View: View,
               Model: Model,
               Collection: Collection
           };
@@ -820,7 +843,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/common.js
+          /home/stayrad/Projects/Ranger/lib/common.js
         */
 
       }, function(require, module, exports) {
@@ -842,7 +865,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/views/pane.js
+          /home/stayrad/Projects/Ranger/lib/views/pane.js
         */
 
       }, function(require, module, exports) {
@@ -860,7 +883,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/views/item.js
+          /home/stayrad/Projects/Ranger/lib/views/item.js
         */
 
       }, function(require, module, exports) {
@@ -878,7 +901,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/controllers/panes.js
+          /home/stayrad/Projects/Ranger/lib/controllers/panes.js
         */
 
         'base': 1,
@@ -910,7 +933,7 @@
               return Panes;
           };
       
-          Panes = Base.Controller.extend({
+          Panes = Base.View.extend({
       
               tagName: 'section',
       
@@ -1039,7 +1062,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/controllers/items.js
+          /home/stayrad/Projects/Ranger/lib/controllers/items.js
         */
 
         'base': 1,
@@ -1065,7 +1088,7 @@
               return Items;
           };
       
-          Items = Base.Controller.extend({
+          Items = Base.View.extend({
       
               tagName: 'div',
               className: 'item',
@@ -1128,7 +1151,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/models/pane.js
+          /home/stayrad/Projects/Ranger/lib/models/pane.js
         */
 
         'base': 1,
@@ -1178,7 +1201,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/models/item.js
+          /home/stayrad/Projects/Ranger/lib/models/item.js
         */
 
         'base': 1,
