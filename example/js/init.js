@@ -10,31 +10,11 @@
     ['Songs', 'Name']
   ];
 
-  ranger.loadRaw(items, panes);
+  ranger.setPanes(panes);
+  // ranger.load(items);
 
-  window.stressTest = function () {
-    var state = true;
-    var i = 0;
-    var count = 100;
-    var repeat = function() {
-      console.log('refresh', i, state);
-      if (state) {
-        state = false;
-        panes = [
-          ['Artists', 'ArtistName'],
-          ['Songs', 'Name']
-        ];
-      } else {
-        state = true;
-        panes = [
-          ['Albums', 'AlbumName'],
-          ['Songs', 'Name']
-        ];
-      }
-      ranger.loadRaw(items, panes);
-      if (i++ < count) { setTimeout(repeat, 1000); }
-    };
-    repeat();
+  for (var i = 0; i < items.length; i++) {
+    ranger.add(items[i]);
   };
 
   openItem = function () {

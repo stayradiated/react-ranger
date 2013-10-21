@@ -9,7 +9,7 @@
           if ((typeof require !== "undefined" && require !== null)) {
             return require(id);
           }
-          console.log("Cannot find module '" + id + "'");
+          console.trace("Cannot find module '" + id + "'");
           return null;
         }
         file = cache[id] = {
@@ -31,17 +31,191 @@
     [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/controllers/ranger.js
+          /Users/Admin/Projects/Ranger/lib/controllers/ranger.js
         */
 
-        'base': 1,
-        '../common': 2,
-        '../views/pane': 3,
-        '../views/item': 4,
-        '../controllers/panes': 5,
-        '../controllers/items': 6,
-        '../models/pane': 7,
-        '../models/item': 8
+        '../views/ranger': 1,
+        '../models/pane': 8
+      }, function(require, module, exports) {
+        (function () {
+      
+        'use strict';
+      
+        var View, Ranger, Pane;
+      
+        View = require('../views/ranger');
+        Pane = require('../models/pane').prototype.model;
+      
+        Ranger = (function () {
+      
+          function Ranger (attrs) {
+            this.view = new View(attrs);
+      
+            this.up = this.view.up;
+            this.down = this.view.down;
+            this.left = this.view.left;
+            this.right = this.view.right;
+            this.open = this.view.open;
+      
+          };
+      
+          Ranger.prototype.setPanes = function(panes) {
+            this.panes = panes;
+            this.view.panes.create({
+              title: panes[0][0],
+              key: panes[0][1]
+            });
+          };
+      
+          Ranger.prototype.findPane = function(name) {
+            for (var i = this.panes.length - 1; i >= 0; i--) {
+              if (this.panes[i][1] == name) {
+                return i;
+              }
+            };
+            return -1;
+          };
+      
+          Ranger.prototype.load = function(array)  {
+            var i, id, item, key, length, main, map, out, title, x, j, alen, plen;
+      
+            // You can only have one top level pane at a time
+            if (this.view.panes.length > 0) {
+                this.view.panes.first().destroy();
+            }
+      
+            map    = {};
+            main   = {};
+            length = this.panes.length - 1;
+      
+            // Loop through each item in the array - { object }
+            for (i = 0, alen = array.length; i < alen; i += 1) {
+      
+                item = array[i];
+                out  = main;
+                x    = '';
+      
+                // Loop through each panel - [name, title]
+                for (j = 0, plen = this.panes.length; j < plen; j += 1) {
+      
+                    title = this.panes[j][0];
+                    key   = this.panes[j][1];
+      
+                    out.key = key;
+                    out.title = title;
+                    if (out.contents === undefined) {
+                        out.contents = [];
+                    }
+      
+                    x += title + ':' + item[key] + ':';
+      
+                    if (map[x] === undefined) {
+                        id = out.contents.push({
+                            title: item[key]
+                        }) - 1;
+                        map[x] = out.contents[id];
+                    }
+      
+                    if (j !== length) {
+      
+                        if (map[x].child !== undefined) {
+                            out = map[x].child;
+                        } else {
+                            out = map[x].child = {};
+                        }
+      
+                    } else {
+                        map[x].data = item;
+                    }
+                }
+            }
+            this.view.panes.create(main);
+          };
+      
+          Ranger.prototype.add = function(object) {
+            var first, itemData, self = this;
+      
+            // Add the item to the first pane
+            first    = this.view.panes.first();
+            itemData = this._addItem(object, first);
+      
+            // Recursive function
+            var addPane = function (itemData) {
+              var item, pane, index;
+      
+              item = itemData[0];
+              pane = itemData[1];
+              index = self.findPane(pane.key)
+      
+              if (index > -1 && ++index < self.panes.length) {
+                pane = self.panes[index];
+                item.child = new Pane({
+                  title: pane[0],
+                  key: pane[1]
+                });
+                item.child.parent = item;
+                addPane(self._addItem(object, item.child));
+              }
+            }
+      
+            addPane(itemData);
+      
+          };
+      
+          Ranger.prototype._addItem = function(object, pane) {
+            var key, value, item, data, exists, force, self = this;
+            key = pane.key;
+            value = object[key];
+      
+            force = this.findPane(pane.key) >= this.panes.length - 1;
+      
+            if (! force) {
+              pane.contents.forEach(function (el) {
+                if (! exists && el.title === value && el.child) {
+                  exists = true;
+                  data = self._addItem(object, el.child);
+                }
+              });
+            }
+      
+            if (! exists || force) {
+              item = pane.contents.create({
+                title: value
+              });
+              if (force) item.data = object;
+            }
+      
+            return data || [item, pane];
+      
+          };
+      
+          return Ranger;
+      
+        }());
+      
+        // Export global if we are running in a browser
+        if (typeof global === 'undefined') {
+            window.Ranger = Ranger;
+        }
+      
+        module.exports = Ranger;
+      
+      }());;
+      }
+    ], [
+      {
+        /*
+          /Users/Admin/Projects/Ranger/lib/views/ranger.js
+        */
+
+        'base': 2,
+        '../utils/bind': 3,
+        '../templates/pane': 4,
+        '../templates/item': 5,
+        '../views/panes': 6,
+        '../views/items': 7,
+        '../models/pane': 8,
+        '../models/item': 9
       }, function(require, module, exports) {
         /*jslint browser: true, node: true, nomen: true*/
       /*global $*/
@@ -50,43 +224,31 @@
       
           'use strict';
       
-          var Base, Item, Items, Pane, Panes, Ranger, template, vent, bind;
+          var Base, Item, Items, Pane, Panes, Ranger, template, vent, bindAll;
       
           Base = require('base');
-          bind = require('../common').bind;
+          bindAll = require('../utils/bind')
       
           // Global event passer
           vent = new Base.Event();
       
           // Templates
           template = {
-              pane: require('../views/pane'),
-              item: require('../views/item')
+              pane: require('../templates/pane'),
+              item: require('../templates/item')
           };
       
-          // Controllers and Models
-          Panes = require('../controllers/panes')(vent, template.pane);
-          Items = require('../controllers/items')(vent, template.item);
+          // Views and Models
+          Panes = require('../views/panes')(vent, template.pane);
+          Items = require('../views/items')(vent, template.item);
           Pane  = require('../models/pane');
           Item  = require('../models/item');
       
           Ranger = Base.View.extend({
       
               constructor: function () {
-      
-                  this.open        = bind(this.open, this);
-                  this.left        = bind(this.left, this);
-                  this.right       = bind(this.right, this);
-                  this.down        = bind(this.down, this);
-                  this.up          = bind(this.up, this);
-                  this.selectFirst = bind(this.selectFirst, this);
-                  this.loadRaw     = bind(this.loadRaw, this);
-                  this.remove      = bind(this.remove, this);
-                  this.addOne      = bind(this.addOne, this);
-                  this.recheck     = bind(this.recheck, this);
-                  this.selectItem  = bind(this.selectItem, this);
-                  this.selectPane  = bind(this.selectPane, this);
                   Ranger.__super__.constructor.apply(this, arguments);
+                  bindAll(this);
       
                   this.current = {
                       pane: null,
@@ -146,60 +308,6 @@
                   this.recheck(pane);
               },
       
-              // Load an array of objects
-              loadRaw: function (array, panes) {
-                  var i, id, item, key, length, main, map, out, title, x, j, alen, plen;
-      
-                  // You can only have one top level pane at a time
-                  if (this.panes.length > 0) {
-                      this.panes.first().destroy();
-                  }
-      
-                  map    = {};
-                  main   = {};
-                  length = panes.length - 1;
-      
-                  for (i = 0, alen = array.length; i < alen; i += 1) {
-      
-                      item = array[i];
-                      out  = main;
-                      x    = '';
-      
-                      for (j = 0, plen = panes.length; j < plen; j += 1) {
-      
-                          title = panes[j][0];
-                          key   = panes[j][1];
-      
-                          out.title = title;
-                          if (out.contents === undefined) {
-                              out.contents = [];
-                          }
-      
-                          x += title + ':' + item[key] + ':';
-      
-                          if (map[x] === undefined) {
-                              id = out.contents.push({
-                                  title: item[key]
-                              }) - 1;
-                              map[x] = out.contents[id];
-                          }
-      
-                          if (j !== length) {
-      
-                              if (map[x].child !== undefined) {
-                                  out = map[x].child;
-                              } else {
-                                  out = map[x].child = {};
-                              }
-      
-                          } else {
-                              map[x].data = item;
-                          }
-                      }
-                  }
-                  this.panes.create(main);
-              },
-      
               // Select the first item in the first pane
               selectFirst: function () {
                   var item, pane;
@@ -250,11 +358,6 @@
       
           });
       
-          // Export global if we are running in a browser
-          if (typeof process === 'undefined' || process.title === 'browser') {
-              window.Ranger = Ranger;
-          }
-      
           module.exports = Ranger;
       
       }());
@@ -263,7 +366,7 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/node_modules/base/index.js
+          /Users/Admin/Projects/Ranger/node_modules/base/index.js
         */
 
       }, function(require, module, exports) {
@@ -324,7 +427,7 @@
       
           Event = (function () {
       
-              function Event(attrs) {
+              function Event (attrs) {
                   this._events = {};
                   this._listening = [];
               }
@@ -843,7 +946,7 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/common.js
+          /Users/Admin/Projects/Ranger/lib/utils/bind.js
         */
 
       }, function(require, module, exports) {
@@ -851,11 +954,18 @@
       
           'use strict';
       
-          module.exports = {
-              bind: function (fn, me) {
-                  return function () {
-                      return fn.apply(me, arguments);
-                  };
+          module.exports = function (me) {
+              var key, proto = me.__proto__;
+              for (key in proto) {
+                  if (proto.hasOwnProperty(key) &&
+                      key !== 'constructor' &&
+                      typeof proto[key] === 'function') {
+                      (function(key) {
+                          me[key] = function () {
+                              return proto[key].apply(me, arguments);
+                          }
+                      }(key));
+                  }
               }
           };
       
@@ -865,7 +975,7 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/views/pane.js
+          /Users/Admin/Projects/Ranger/lib/templates/pane.js
         */
 
       }, function(require, module, exports) {
@@ -883,7 +993,7 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/views/item.js
+          /Users/Admin/Projects/Ranger/lib/templates/item.js
         */
 
       }, function(require, module, exports) {
@@ -901,12 +1011,12 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/controllers/panes.js
+          /Users/Admin/Projects/Ranger/lib/views/panes.js
         */
 
-        'base': 1,
-        '../controllers/items': 6,
-        '../common': 2
+        'base': 2,
+        '../views/items': 7,
+        '../utils/bind': 3
       }, function(require, module, exports) {
         /*jslint browser: true, node: true, nomen: true*/
       /*global $*/
@@ -915,11 +1025,11 @@
       
           'use strict';
       
-          var Base, Items, bind, Panes, template, vent, SCROLL_OFFSET, SCROLL_HEIGHT;
+          var Base, Items, bindAll, Panes, template, vent, SCROLL_OFFSET, SCROLL_HEIGHT;
       
           Base  = require('base');
-          Items = require('../controllers/items')();
-          bind  = require('../common').bind;
+          Items = require('../views/items')();
+          bindAll = require('../utils/bind');
       
           // Constants
           // TODO: Let the user set these
@@ -940,17 +1050,8 @@
               className: 'pane',
       
               constructor: function () {
-      
-                  this.right           = bind(this.right, this);
-                  this.down            = bind(this.down, this);
-                  this.up              = bind(this.up, this);
-                  this.move            = bind(this.move, this);
-                  this.addOne          = bind(this.addOne, this);
-                  this.render          = bind(this.render, this);
-                  this.select          = bind(this.select, this);
-                  this.updateScrollbar = bind(this.updateScrollbar, this);
-                  this.remove          = bind(this.remove, this);
                   Panes.__super__.constructor.apply(this, arguments);
+                  bindAll(this);
       
                   this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
                   this.active = null;
@@ -963,7 +1064,8 @@
                           'move:right': this.right
                       },
                       this.pane.contents, {
-                          'click:item': this.select
+                          'click:item': this.select,
+                          'create:model': this.addOne
                       }
                   ]);
       
@@ -1062,11 +1164,11 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/controllers/items.js
+          /Users/Admin/Projects/Ranger/lib/views/items.js
         */
 
-        'base': 1,
-        '../common': 2
+        'base': 2,
+        '../utils/bind': 3
       }, function(require, module, exports) {
         /*jslint browser: true, node: true, nomen: true*/
       /*global $*/
@@ -1075,10 +1177,10 @@
       
           'use strict';
       
-          var Base, Items, template, vent, bind;
+          var Base, Items, template, vent, bindAll;
       
           Base = require('base');
-          bind = require('../common').bind;
+          bindAll = require('../utils/bind');
       
           // Set globals
           module.exports = function (vnt, tmpl) {
@@ -1098,31 +1200,26 @@
               },
       
               constructor: function () {
-      
-                  this.select = bind(this.select, this);
-                  this.click  = bind(this.click, this);
-                  this.remove = bind(this.remove, this);
-                  this.render = bind(this.render, this);
                   Items.__super__.constructor.apply(this, arguments);
+                  bindAll(this);
       
                   this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
                   this.bind();
       
                   this.listen([
                       this.item, {
-                          'select': this.select
+                          'select': this.select,
+                          'change:child': this.render
                       },
                       this.item.collection, {
                           'remove': this.remove
                       }
                   ]);
-      
-                  this.el.toggleClass('hasChild', !!this.item.child);
-      
               },
       
               render: function () {
                   this.el.html(template(this.item.toJSON()));
+                  this.el.toggleClass('hasChild', !!this.item.child);
                   return this;
               },
       
@@ -1151,11 +1248,11 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/models/pane.js
+          /Users/Admin/Projects/Ranger/lib/models/pane.js
         */
 
-        'base': 1,
-        '../models/item': 8
+        'base': 2,
+        '../models/item': 9
       }, function(require, module, exports) {
         /*jslint browser: true, node: true, nomen: true*/
       
@@ -1172,13 +1269,16 @@
       
               defaults: {
                   title: '',
-                  contents: []
+                  key: '',
+                  contents: null
               },
       
               constructor: function (attrs) {
                   Pane.__super__.constructor.apply(this, arguments);
                   this.contents = new Item();
-                  this.contents.refresh(attrs.contents, true);
+                  if (attrs.contents) {
+                      this.contents.refresh(attrs.contents, true);
+                  }
               }
       
           });
@@ -1201,11 +1301,11 @@
     ], [
       {
         /*
-          /home/stayrad/Projects/Ranger/lib/models/item.js
+          /Users/Admin/Projects/Ranger/lib/models/item.js
         */
 
-        'base': 1,
-        '../models/pane': 7
+        'base': 2,
+        '../models/pane': 8
       }, function(require, module, exports) {
         /*jslint browser: true, node: true, nomen: true*/
       
