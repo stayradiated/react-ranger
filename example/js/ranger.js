@@ -9,7 +9,7 @@
           if ((typeof require !== "undefined" && require !== null)) {
             return require(id);
           }
-          console.trace("Cannot find module '" + id + "'");
+          console.log("Cannot find module '" + id + "'");
           return null;
         }
         file = cache[id] = {
@@ -31,7 +31,7 @@
     [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/controllers/ranger.js
+          /home/stayrad/Projects/Ranger/lib/controllers/ranger.js
         */
 
         '../views/ranger': 1,
@@ -44,7 +44,7 @@
         var View, Ranger, Pane;
       
         View = require('../views/ranger');
-        Pane = require('../models/pane').prototype.model;
+        Pane = require('../models/pane');
       
         Ranger = (function () {
       
@@ -61,10 +61,7 @@
       
           Ranger.prototype.setPanes = function(panes) {
             this.panes = panes;
-            this.view.panes.create({
-              title: panes[0][0],
-              key: panes[0][1]
-            });
+            this.clear();
           };
       
           Ranger.prototype.findPane = function(name) {
@@ -76,13 +73,20 @@
             return -1;
           };
       
+          // Remove all the current items
+          Ranger.prototype.clear = function() {
+            this.view.pane.destroy();
+            this.view.pane.refresh({
+              title: this.panes[0][0],
+              key: this.panes[0][1]
+            }, true);
+          };
+      
           Ranger.prototype.load = function(array)  {
             var i, id, item, key, length, main, map, out, title, x, j, alen, plen;
       
             // You can only have one top level pane at a time
-            if (this.view.panes.length > 0) {
-                this.view.panes.first().destroy();
-            }
+            this.view.pane.destroy();
       
             map    = {};
             main   = {};
@@ -129,15 +133,14 @@
                     }
                 }
             }
-            this.view.panes.create(main);
+            this.view.pane = new Pane(main)
           };
       
           Ranger.prototype.add = function(object) {
             var first, itemData, self = this;
       
             // Add the item to the first pane
-            first    = this.view.panes.first();
-            itemData = this._addItem(object, first);
+            itemData = this._addItem(object, this.view.pane);
       
             // Recursive function
             var addPane = function (itemData) {
@@ -205,7 +208,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/views/ranger.js
+          /home/stayrad/Projects/Ranger/lib/views/ranger.js
         */
 
         'base': 2,
@@ -224,7 +227,7 @@
       
           'use strict';
       
-          var Base, Item, Items, Pane, Panes, Ranger, template, vent, bindAll;
+          var Base, Item, ItemView, Pane, PaneView, Ranger, template, vent, bindAll;
       
           Base = require('base');
           bindAll = require('../utils/bind')
@@ -238,9 +241,11 @@
               item: require('../templates/item')
           };
       
-          // Views and Models
-          Panes = require('../views/panes')(vent, template.pane);
-          Items = require('../views/items')(vent, template.item);
+          // Intialise views
+          PaneView = require('../views/panes')(vent, template.pane);
+          ItemView = require('../views/items')(vent, template.item);
+      
+          // Models
           Pane  = require('../models/pane');
           Item  = require('../models/item');
       
@@ -255,12 +260,13 @@
                       item: null
                   };
       
-                  this.panes = new Pane();
-                  this.panes.on('create:model show', this.addOne);
-                  this.panes.on('before:destroy:model', this.remove);
+                  this.pane = new Pane();
+                  this.pane.on('refresh', this.addOne);
+                  this.pane.on('before:destroy', this.remove);
       
                   vent.on('select:item', this.selectItem);
                   vent.on('select:pane', this.selectPane);
+                  vent.on('show:pane', this.addOne);
       
               },
       
@@ -277,7 +283,7 @@
                   if (!item.child) {
                       return;
                   }
-                  this.panes.trigger('show', item.child);
+                  vent.trigger('show:pane', item.child);
               },
       
               // Remove panes that aren't displayed
@@ -294,8 +300,7 @@
       
               // Render a pane
               addOne: function (pane) {
-                  var view;
-                  view = new Panes({
+                  var view = new PaneView({
                       pane: pane
                   });
                   this.el.append(view.render().el);
@@ -304,15 +309,14 @@
               // Destroying the view of a pane when the model is destroyed
               // Also destroy all child views
               remove: function (pane) {
+                  console.log('removing a pane', pane);
                   pane.trigger('remove');
                   this.recheck(pane);
               },
       
               // Select the first item in the first pane
               selectFirst: function () {
-                  var item, pane;
-                  pane = this.panes.first();
-                  item = pane.contents.first();
+                  var item = this.pane.contents.first();
                   pane.contents.trigger('click:item', item);
               },
       
@@ -366,7 +370,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/node_modules/base/index.js
+          /home/stayrad/Projects/Ranger/node_modules/base/index.js
         */
 
       }, function(require, module, exports) {
@@ -427,7 +431,7 @@
       
           Event = (function () {
       
-              function Event (attrs) {
+              function Event(attrs) {
                   this._events = {};
                   this._listening = [];
               }
@@ -727,15 +731,15 @@
                       include(this._data, this.defaults);
                   }
                   include(this._data, data);
-                  this.trigger('refresh');
+                  this.trigger('refresh', this);
                   return this;
               };
       
               // Destroy the model
               Model.prototype.destroy = function () {
-                  this.trigger('before:destroy');
+                  this.trigger('before:destroy', this);
                   delete this._data;
-                  this.trigger('destroy');
+                  this.trigger('destroy', this);
                   return this;
               };
       
@@ -946,7 +950,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/utils/bind.js
+          /home/stayrad/Projects/Ranger/lib/utils/bind.js
         */
 
       }, function(require, module, exports) {
@@ -975,7 +979,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/templates/pane.js
+          /home/stayrad/Projects/Ranger/lib/templates/pane.js
         */
 
       }, function(require, module, exports) {
@@ -993,7 +997,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/templates/item.js
+          /home/stayrad/Projects/Ranger/lib/templates/item.js
         */
 
       }, function(require, module, exports) {
@@ -1011,7 +1015,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/views/panes.js
+          /home/stayrad/Projects/Ranger/lib/views/panes.js
         */
 
         'base': 2,
@@ -1164,7 +1168,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/views/items.js
+          /home/stayrad/Projects/Ranger/lib/views/items.js
         */
 
         'base': 2,
@@ -1186,7 +1190,6 @@
           module.exports = function (vnt, tmpl) {
               if (vent === undefined) { vent = vnt; }
               if (template === undefined) { template = tmpl; }
-              window.TEMPLATE = template;
               return Items;
           };
       
@@ -1219,7 +1222,7 @@
       
               render: function () {
                   this.el.html(template(this.item.toJSON()));
-                  this.el.toggleClass('hasChild', !!this.item.child);
+                  this.el.toggleClass('hasChild', !! this.item.child);
                   return this;
               },
       
@@ -1248,52 +1251,44 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/models/pane.js
+          /home/stayrad/Projects/Ranger/lib/models/pane.js
         */
 
         'base': 2,
         '../models/item': 9
       }, function(require, module, exports) {
         /*jslint browser: true, node: true, nomen: true*/
-      
       (function () {
-      
           'use strict';
       
-          var Base, Item, Pane, Panes;
-      
-          Base = require('base');
-          Item = require('../models/item');
+          var Pane, Base = require('base');
       
           Pane = Base.Model.extend({
       
               defaults: {
-                  title: '',
                   key: '',
+                  title: '',
                   contents: null
               },
       
               constructor: function (attrs) {
                   Pane.__super__.constructor.apply(this, arguments);
-                  this.contents = new Item();
-                  if (attrs.contents) {
+      
+                  var ItemCollection = require('../models/item');
+                  this.contents = new ItemCollection();
+      
+                  if (attrs && attrs.contents) {
                       this.contents.refresh(attrs.contents, true);
                   }
+      
+                  this.on('refresh', function(self) {
+                      self.contents = new ItemCollection();
+                  });
               }
       
           });
       
-          Panes = Base.Collection.extend({
-      
-              constructor: function () {
-                  return Panes.__super__.constructor.apply(this, arguments);
-              },
-      
-              model: Pane
-      
-          });
-      
-          module.exports = Panes;
+          module.exports = Pane;
       
       }());
       ;
@@ -1301,7 +1296,7 @@
     ], [
       {
         /*
-          /Users/Admin/Projects/Ranger/lib/models/item.js
+          /home/stayrad/Projects/Ranger/lib/models/item.js
         */
 
         'base': 2,
@@ -1313,9 +1308,10 @@
       
           'use strict';
       
-          var Base, Item, Items;
+          var Base, Item, Items, Pane;
       
           Base = require('base');
+          Pane = require('../models/pane');
       
           // Item Model
           Item = Base.Model.extend({
@@ -1332,7 +1328,6 @@
                   if (attrs.child === undefined) {
                       return;
                   }
-                  Pane = require('../models/pane').prototype.model;
                   this.child = new Pane(attrs.child);
                   this.child.parent = this;
               }
