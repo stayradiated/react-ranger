@@ -9,6 +9,9 @@
   },
   "author": "George Czabania",
   "license": "BSD",
+  "scripts": {
+    "compile": "scrunch -i lib/controllers/ranger.js -o example/js/ranger.js"
+  },
   "bugs": {
     "url": "https://github.com/stayradiated/Ranger/issues"
   },
@@ -16,6 +19,6 @@
     "base": "git://github.com/stayradiated/Base.git#master"
   },
   "devDependencies": {
-    "coffee-scrunch": ">=0.1.0"
+    "coffee-scrunch": "0.2.x"
   }
 }
