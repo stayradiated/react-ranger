@@ -646,6 +646,7 @@
         Item = Base.Model.extend({
     
             defaults: {
+                id: null,
                 title: '',
                 child: false,
                 data: false
@@ -1161,12 +1162,12 @@
       inherit(Collection, Event);
     
       // Generate a new id
-      Collection.prototype.generateId = function () {
+      Collection.prototype._generateId = function () {
         return 'c' + this._index++;
       };
     
       // Parse id
-      Collection.prototype.parseId = function (id) {
+      Collection.prototype._parseId = function (id) {
         var number;
         id = id.toString();
         number = parseInt(id.slice(1), 10);
@@ -1175,8 +1176,10 @@
     
       // Update id
       // - id (number) : output from this.parseId()
-      Collection.prototype.updateId = function (id) {
-        this._index = id + 1;
+      Collection.prototype._updateIndex = function (id) {
+        if (id > this._index) {
+          this._index = id + 1;
+        }
       };
     
       // Access all models
@@ -1193,18 +1196,20 @@
     
       // Add a model to the collection
       Collection.prototype.add = function (model, options) {
+        var id, number, index;
     
-        var id, number, index, self = this;
+        // Require model defaults to contain 'id'
+        if (! model.defaults.hasOwnProperty('id')) {
+          throw new Error('Base: Models in Collections must have a default id');
+        }
     
         // Set ID
         if (model.id !== null && model.id !== undefined) {
           // Make sure we don't reuse an existing id
-          id = this.parseId(model.id);
-          if (number >= this._index) {
-            this.updateId(number);
-          }
+          id = this._parseId(model.id);
+          this._updateIndex(id);
         } else {
-          id = this.generateId();
+          id = this._generateId();
           model.set('id', id, {silent: true});
         }
     
@@ -1265,9 +1270,22 @@
         this.trigger('change');
       };
     
-      // Reorder the collection
+      /**
+       * Collection::Move
+       *
+       * Reorder the collection.
+       * Will place the model before the position.
+       * This means that the model may not be at the position afterwards.
+       *
+       * - model (id|Model)
+       * - pos (int)
+       * > null
+       */
+    
       Collection.prototype.move = function (model, pos) {
         var index = this.indexOf(model);
+        if (index === pos) { return; }
+        if (index < pos) { pos--; }
         this._models.splice(index, 1);
         this._models.splice(pos, 0, model);
         this.trigger('change:order');
