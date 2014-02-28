@@ -173,7 +173,6 @@ Item = Base.Model.extend({
   },
 
   constructor: function (attrs) {
-    var Pane;
     Item.__super__.constructor.apply(this, arguments);
     if (typeof attrs.child !== 'undefined') {
       this.child = new Pane(attrs.child);
@@ -197,9 +196,19 @@ module.exports = Items;
 },{"../models/pane":4,"base":10}],4:[function(_dereq_,module,exports){
 'use strict';
 
-var Pane, Base;
+var Base, Pane;
 
 Base = _dereq_('base');
+
+/*
+ * Pane
+ *
+ * Represents a column
+ *
+ * - key (string) : item property name to display
+ * - title (string) : the name of the column
+ * - contents (item collection) : a collection of items
+ */
 
 Pane = Base.Model.extend({
 
@@ -210,9 +219,11 @@ Pane = Base.Model.extend({
   },
 
   constructor: function (attrs) {
+    var ItemCollection;
+
     Pane.__super__.constructor.apply(this, arguments);
 
-    var ItemCollection = _dereq_('../models/item');
+    ItemCollection = _dereq_('../models/item');
     this.contents = new ItemCollection();
 
     if (attrs && attrs.contents) {
@@ -258,9 +269,9 @@ var Base, Items, template, vent;
 Base = _dereq_('base');
 
 // Set globals
-module.exports = function (vnt, tmpl) {
-  if (vent === undefined) { vent = vnt; }
-  if (template === undefined) { template = tmpl; }
+module.exports = function (_vent, _template) {
+  if (vent === undefined) vent = _vent;
+  if (template === undefined) template = _template;
   return Items;
 };
 
@@ -274,12 +285,11 @@ Items = Base.View.extend({
   },
 
   constructor: function () {
-    Items.__super__.constructor.apply(this, arguments);
-
     this.click = this.click.bind(this);
 
-    this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
-    this.bind();
+    Items.__super__.constructor.apply(this, arguments);
+
+    this.bind($('<' + this.tagName + ' class="' + this.className + '">'));
 
     this.listen([
       this.item, {
@@ -339,7 +349,8 @@ Panes = Base.View.extend({
   constructor: function () {
     Panes.__super__.constructor.apply(this, arguments);
 
-    this.el = $("<" + this.tagName + " class=\"" + this.className + "\">");
+    this.bind($('<' + this.tagName + ' class="' + this.className + '">'));
+
     this.active = null;
 
     this.listen([

@@ -24,7 +24,9 @@
     if (!item) { return; }
   };
 
-  document.onkeydown = function (e) {
+  $(document).keydown(function (e) {
+
+    console.log(e);
 
     switch (e.keyCode) {
       case 13:
@@ -54,6 +56,6 @@
       return false;
     }
 
-  };
+  });
 
 }());
