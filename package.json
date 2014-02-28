@@ -1,6 +1,6 @@
 {
   "name": "ranger",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A column browser for browsers",
   "main": "lib/controllers/ranger.js",
   "repository": {
@@ -8,9 +8,10 @@
     "url": "git://github.com/stayradiated/ranger.git"
   },
   "author": "George Czabania",
-  "license": "BSD",
+  "license": "MIT",
   "scripts": {
-    "compile": "scrunch -i lib/controllers/ranger.js -o example/js/ranger.js"
+    "compile": "scrunch -i lib/controllers/ranger.js -o example/js/ranger.js",
+    "build": "browserify index.js -s Ranger -o example/js/ranger.js"
   },
   "bugs": {
     "url": "https://github.com/stayradiated/ranger/issues"
@@ -19,6 +20,6 @@
     "base": "git://github.com/stayradiated/base.git#master"
   },
   "devDependencies": {
-    "coffee-scrunch": "0.2.x"
+    "browserify": "3.31.x"
   }
 }

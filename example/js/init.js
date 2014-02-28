@@ -1,8 +1,10 @@
 (function() {
 
-  window.ranger = new Ranger({
+  var ranger = new Ranger({
     el: $('.ranger')
   });
+
+  window._ranger = ranger;
 
   var panes = [
     ['Artists', 'ArtistName'],
@@ -15,12 +17,11 @@
 
   for (var i = 0; i < items.length; i++) {
     ranger.add(items[i]);
-  };
+  }
 
   openItem = function () {
     var item = ranger.open();
     if (!item) { return; }
-    console.log(item);
   };
 
   document.onkeydown = function (e) {

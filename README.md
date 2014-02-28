@@ -34,3 +34,33 @@ It's similar to the terminal app of the same name.
         }
       ]
     }
+
+# Documentation
+
+## Ranger
+
+```html
+<body>
+    <div class="browser">
+    </div>
+</body>
+```
+
+```javascript
+var ranger = new Ranger({
+    el: $('.browser');
+});
+```
+
+# Copyright & License
+
+TODO: Paste in MIT license
+
+# Changelog
+
+## 0.2.1
+
+- Clean up code
+- Use browserify instead of coffee-scrunch
+- Start writing some proper documentation
+- Add a license
