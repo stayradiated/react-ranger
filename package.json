@@ -1,24 +1,26 @@
 {
   "name": "ranger",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A column browser for browsers",
-  "main": "lib/controllers/ranger.js",
+  "main": "pkg/index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/stayradiated/ranger.git"
   },
   "author": "George Czabania",
-  "license": "BSD",
-  "scripts": {
-    "compile": "scrunch -i lib/controllers/ranger.js -o example/js/ranger.js"
-  },
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/stayradiated/ranger/issues"
   },
   "dependencies": {
-    "base": "git://github.com/stayradiated/base.git#master"
+    "react": "^0.10.0"
   },
   "devDependencies": {
-    "coffee-scrunch": "0.2.x"
+    "browserify": "^4.1.5",
+    "gulp": "^3.6.2",
+    "gulp-connect": "^2.0.5",
+    "gulp-react": "^0.3.3",
+    "reactify": "^0.13.1",
+    "vinyl-source-stream": "^0.1.1"
   }
 }

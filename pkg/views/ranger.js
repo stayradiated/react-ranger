@@ -1,22 +1,24 @@
-/*jslint browser: true, node: true, nomen: true*/
-/*global $*/
+/** @jsx React.DOM */
+var React = require('react');
+var Pane = require('./pane');
 
-(function () {
+var Ranger = React.createClass({displayName: 'Ranger',
 
-    'use strict';
+  render: function () {
+    console.log(JSON.stringify(this.props.data, null, 2));
+    return (
+      React.DOM.div( {className:"ranger"}, 
+        Pane(null ),
+        Pane(null ),
+        Pane(null )
+      )
+    );
+  }
 
-    var Base, Item, ItemView, Pane, PaneView, Ranger, template, vent, bindAll;
+});
 
-    Base = require('base');
-    bindAll = require('../utils/bind')
-
-    // Global event passer
-    vent = new Base.Event();
-
-    // Templates
-    template = {
-        pane: require('../templates/pane'),
-        item: require('../templates/item')
+module.exports = Ranger;
+tem: require('../templates/item')
     };
 
     // Intialise views
