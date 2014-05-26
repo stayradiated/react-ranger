@@ -1,16 +1,92 @@
 /** @jsx React.DOM */
 var React = require('react');
 var Pane = require('./pane');
+var $ = require('jquery');
 
 var Ranger = React.createClass({displayName: 'Ranger',
 
+  getInitialState: function () {
+    return {
+      index: 0,
+      directory: this.props.data
+    };
+  },
+
+  focus: function () {
+    $(this.refs.input.getDOMNode()).focus();
+  },
+
+  handleKeyDown: function (e) {
+    switch (e.keyCode) {
+      case 37: // left
+        this.out();
+        break;
+      case 38: // up
+        this.up();
+        break;
+      case 39: // right
+        this.into();
+        break;
+      case 40: // down
+        this.down();
+        break;
+    }
+  },
+
+  getActive: function () {
+    return this.state.directory.contents[this.state.index];
+  },
+
+  up: function () {
+    this.setState({
+      index: Math.max(this.state.index - 1, 0)
+    });
+  },
+
+  down: function () {
+    this.setState({
+      index: Math.min(this.state.index + 1, this.state.directory.contents.length - 1)
+    });
+  },
+
+  into: function () {
+    var active = this.getActive();
+    if (! active || active.type !== 'directory') return;
+    this.setState({
+      index: 0,
+      directory: active
+    });
+  },
+
+  out: function () {
+    if (! this.state.directory.parent) return;
+    this.setState({
+      directory: this.state.directory.parent
+    });
+  },
+
+
   render: function () {
-    console.log(JSON.stringify(this.props.data, null, 2));
+    var active = this.getActive();
+    var directory = this.state.directory;
+    var parent = this.state.directory.parent;
+
+    var panes = [
+      Pane( {key:directory.name, contents:directory.contents, active:active} )
+    ];
+
+    if (parent) {
+      panes.unshift(Pane( {key:parent.name, contents:parent.contents} ));
+    }
+
+    if (active && active.type === 'directory') {
+      panes.push(Pane( {key:active.name, contents:active.contents} ));
+    }
+
     return (
-      React.DOM.div( {className:"ranger"}, 
-        Pane(null ),
-        Pane(null ),
-        Pane(null )
+      React.DOM.div( {className:"ranger", onClick:this.focus}, 
+        panes,
+        React.DOM.input( {type:"text", ref:"input", onKeyDown:this.handleKeyDown} )
       )
     );
   }
@@ -18,130 +94,3 @@ var Ranger = React.createClass({displayName: 'Ranger',
 });
 
 module.exports = Ranger;
-tem: require('../templates/item')
-    };
-
-    // Intialise views
-    PaneView = require('../views/panes')(vent, template.pane);
-    ItemView = require('../views/items')(vent, template.item);
-
-    // Models
-    Pane  = require('../models/pane');
-    Item  = require('../models/item');
-
-    Ranger = Base.View.extend({
-
-        constructor: function () {
-            Ranger.__super__.constructor.apply(this, arguments);
-            bindAll(this);
-
-            this.current = {
-                pane: null,
-                item: null
-            };
-
-            this.pane = new Pane();
-            this.pane.on('refresh', this.addOne);
-            this.pane.on('before:destroy', this.remove);
-
-            vent.on('select:item', this.selectItem);
-            vent.on('select:pane', this.selectPane);
-            vent.on('show:pane', this.addOne);
-
-        },
-
-        // Select a pane
-        selectPane: function (pane) {
-            this.current.pane = pane;
-            this.el.find('.active.pane').removeClass('active');
-        },
-
-        // Select an item
-        selectItem: function (item, pane) {
-            this.current.item = item;
-            this.recheck(pane);
-            if (!item.child) {
-                return;
-            }
-            vent.trigger('show:pane', item.child);
-        },
-
-        // Remove panes that aren't displayed
-        recheck: function (pane) {
-            var _this = this;
-            return pane.contents.forEach(function (item) {
-                if (!item.child) {
-                    return;
-                }
-                item.child.trigger('remove');
-                _this.recheck(item.child);
-            });
-        },
-
-        // Render a pane
-        addOne: function (pane) {
-            var view = new PaneView({
-                pane: pane
-            });
-            this.el.append(view.render().el);
-        },
-
-        // Destroying the view of a pane when the model is destroyed
-        // Also destroy all child views
-        remove: function (pane) {
-            console.log('removing a pane', pane);
-            pane.trigger('remove');
-            this.recheck(pane);
-        },
-
-        // Select the first item in the first pane
-        selectFirst: function () {
-            var item = this.pane.contents.first();
-            pane.contents.trigger('click:item', item);
-        },
-
-        // Move up
-        up: function () {
-            if (!this.current.pane) {
-                return this.selectFirst();
-            }
-            this.current.pane.trigger('move:up');
-        },
-
-        // Move down
-        down: function () {
-            if (!this.current.pane) {
-                return this.selectFirst();
-            }
-            this.current.pane.trigger('move:down');
-        },
-
-        // Move right
-        right: function () {
-            if (!this.current.pane) {
-                return;
-            }
-            this.current.pane.trigger('move:right');
-        },
-
-        // Move left
-        left: function () {
-            var item, pane, _ref;
-            if (!((_ref = this.current.pane) !== undefined ? _ref.parent : undefined)) {
-                return;
-            }
-            item = this.current.pane.parent;
-            pane = item.collection;
-            pane.trigger('click:item', item);
-        },
-
-        // Return the selcted item
-        open: function () {
-            return this.current.item.data;
-        }
-
-    });
-
-    module.exports = Ranger;
-
-}());

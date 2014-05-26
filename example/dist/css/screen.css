@@ -1,3 +1,12 @@
+body {
+  font-family: sans-serif;
+}
+
+.pane {
+  float: left;
+  width: 33%;
+}
+
 .directory {
   font-weight: bold;
 }
@@ -17,4 +26,13 @@
 .file, .directory {
   line-height: 40px;
   padding: 0 20px;
+}
+
+input {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }

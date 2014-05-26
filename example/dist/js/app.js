@@ -467,22 +467,23 @@ var Ranger = require('./views/ranger');
 module.exports = Ranger;
 
 var sortContents = function (list) {
-  list = _.sortBy(list, ['type', 'name']);
-  list.map(function (item) {
+  list.contents = _.sortBy(list.contents, ['type', 'name']);
+  list.contents.forEach(function (item) {
     if (item.type === 'directory') {
-      item.contents = sortContents(item.contents);
+      sortContents(item);
     }
   });
   return list;
 };
 
 var mkdir = function (list, name) {
+  var contents = list.contents;
 
   // Look for existing directorys
-  for (var i = 0, len = list.length; i < len; i++) {
-    var item = list[i];
+  for (var i = 0, len = contents.length; i < len; i++) {
+    var item = contents[i];
     if (item.type === 'directory' && item.name === name) {
-      return item.contents;
+      return item;
     }
   }
 
@@ -491,8 +492,13 @@ var mkdir = function (list, name) {
 
 Ranger.parseList = function (list) {
 
-  var output = [];
   var isDirectory = /\/$/m;
+
+  var output = {
+    name: '/',
+    type: 'directory',
+    contents: []
+  };
 
   list.forEach(function (fullPath) {
 
@@ -515,8 +521,12 @@ Ranger.parseList = function (list) {
       parent = mkdir(parent, path[i]);
     }
 
-    parent.push(item);
+    item.parent = parent;
+
+    parent.contents.push(item);
   });
+
+  console.log(output);
 
   return sortContents(output);
 
@@ -546,7 +556,7 @@ var Directory = React.createClass({displayName: 'Directory',
 module.exports = Directory;
 
 },{"react/addons":11}],4:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react');
+/** @jsx React.DOM */var React = require('react/addons');
 var classSet = React.addons.classSet;
 
 var File = React.createClass({displayName: 'File',
@@ -568,7 +578,7 @@ var File = React.createClass({displayName: 'File',
 
 module.exports = File;
 
-},{"react":160}],5:[function(require,module,exports){
+},{"react/addons":11}],5:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var File = require('./file');
@@ -576,31 +586,9 @@ var Directory = require('./directory');
 
 var Pane = React.createClass({displayName: 'Pane',
 
-  getInitialState: function () {
-    return {
-      index: 0
-    };
-  },
-
-  up: function () {
-    this.setState({
-      index: Math.max(this.state.index - 1, 0)
-    });
-  },
-
-  down: function () {
-    this.setState({
-      index: Math.min(this.state.index + 1, this.props.contents.length - 1)
-    });
-  },
-
-  getSelected: function () {
-    return this.props.content[this.state.index];
-  },
-
   render: function () {
     var contents = this.props.contents.map(function (item, i) {
-      var isActive = (i === this.state.index);
+      var isActive = (item === this.props.active);
       if (item.type === 'directory') {
         return Directory( {key:i, item:item, active:isActive} );
       } else {
@@ -628,7 +616,8 @@ var Ranger = React.createClass({displayName: 'Ranger',
 
   getInitialState: function () {
     return {
-      active: null
+      index: 0,
+      directory: this.props.data
     };
   },
 
@@ -639,22 +628,73 @@ var Ranger = React.createClass({displayName: 'Ranger',
   handleKeyDown: function (e) {
     switch (e.keyCode) {
       case 37: // left
+        this.out();
         break;
       case 38: // up
-        this.refs.pane.up();
+        this.up();
         break;
       case 39: // right
+        this.into();
         break;
       case 40: // down
-        this.refs.pane.down();
+        this.down();
         break;
     }
   },
 
+  getActive: function () {
+    return this.state.directory.contents[this.state.index];
+  },
+
+  up: function () {
+    this.setState({
+      index: Math.max(this.state.index - 1, 0)
+    });
+  },
+
+  down: function () {
+    this.setState({
+      index: Math.min(this.state.index + 1, this.state.directory.contents.length - 1)
+    });
+  },
+
+  into: function () {
+    var active = this.getActive();
+    if (! active || active.type !== 'directory') return;
+    this.setState({
+      index: 0,
+      directory: active
+    });
+  },
+
+  out: function () {
+    if (! this.state.directory.parent) return;
+    this.setState({
+      directory: this.state.directory.parent
+    });
+  },
+
+
   render: function () {
+    var active = this.getActive();
+    var directory = this.state.directory;
+    var parent = this.state.directory.parent;
+
+    var panes = [
+      Pane( {key:directory.name, contents:directory.contents, active:active} )
+    ];
+
+    if (parent) {
+      panes.unshift(Pane( {key:parent.name, contents:parent.contents} ));
+    }
+
+    if (active && active.type === 'directory') {
+      panes.push(Pane( {key:active.name, contents:active.contents} ));
+    }
+
     return (
       React.DOM.div( {className:"ranger", onClick:this.focus}, 
-        Pane( {contents:this.props.data, ref:"pane"} ),
+        panes,
         React.DOM.input( {type:"text", ref:"input", onKeyDown:this.handleKeyDown} )
       )
     );
