@@ -13,6 +13,7 @@
     "url": "https://github.com/stayradiated/ranger/issues"
   },
   "dependencies": {
+    "lodash": "^2.4.1",
     "react": "^0.10.0"
   },
   "devDependencies": {

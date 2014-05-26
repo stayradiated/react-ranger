@@ -1,0 +1,20 @@
+.directory {
+  font-weight: bold;
+}
+
+.directory:after {
+  content: '/'
+}
+
+.file {
+}
+
+.active {
+  background: #444;
+  color: #fff;
+}
+
+.file, .directory {
+  line-height: 40px;
+  padding: 0 20px;
+}
