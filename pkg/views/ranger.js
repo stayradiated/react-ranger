@@ -72,15 +72,15 @@ var Ranger = React.createClass({displayName: 'Ranger',
     var parent = this.state.directory.parent;
 
     var panes = [
-      Pane( {key:directory.name, contents:directory.contents, active:active} )
+      Pane( {key:directory.path, contents:directory.contents, active:active} )
     ];
 
     if (parent) {
-      panes.unshift(Pane( {key:parent.name, contents:parent.contents} ));
+      panes.unshift(Pane( {key:parent.path, contents:parent.contents} ));
     }
 
     if (active && active.type === 'directory') {
-      panes.push(Pane( {key:active.name, contents:active.contents} ));
+      panes.push(Pane( {key:active.path, contents:active.contents} ));
     }
 
     return (

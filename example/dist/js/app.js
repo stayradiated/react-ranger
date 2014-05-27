@@ -495,6 +495,7 @@ Ranger.parseList = function (list) {
   var isDirectory = /\/$/m;
 
   var output = {
+    path: '',
     name: '/',
     type: 'directory',
     contents: []
@@ -521,12 +522,13 @@ Ranger.parseList = function (list) {
       parent = mkdir(parent, path[i]);
     }
 
+    item.path = parent.path + '/' + item.name;
     item.parent = parent;
 
     parent.contents.push(item);
   });
 
-  console.log(output);
+  output.path = '/';
 
   return sortContents(output);
 
@@ -681,15 +683,15 @@ var Ranger = React.createClass({displayName: 'Ranger',
     var parent = this.state.directory.parent;
 
     var panes = [
-      Pane( {key:directory.name, contents:directory.contents, active:active} )
+      Pane( {key:directory.path, contents:directory.contents, active:active} )
     ];
 
     if (parent) {
-      panes.unshift(Pane( {key:parent.name, contents:parent.contents} ));
+      panes.unshift(Pane( {key:parent.path, contents:parent.contents} ));
     }
 
     if (active && active.type === 'directory') {
-      panes.push(Pane( {key:active.name, contents:active.contents} ));
+      panes.push(Pane( {key:active.path, contents:active.contents} ));
     }
 
     return (

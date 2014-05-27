@@ -33,6 +33,7 @@ Ranger.parseList = function (list) {
   var isDirectory = /\/$/m;
 
   var output = {
+    path: '',
     name: '/',
     type: 'directory',
     contents: []
@@ -59,12 +60,13 @@ Ranger.parseList = function (list) {
       parent = mkdir(parent, path[i]);
     }
 
+    item.path = parent.path + '/' + item.name;
     item.parent = parent;
 
     parent.contents.push(item);
   });
 
-  console.log(output);
+  output.path = '/';
 
   return sortContents(output);
 
