@@ -1,28 +1,28 @@
-var _ = require('lodash');
-var React = require('react');
-var File = require('./file');
-var Directory = require('./directory');
+var React = require('react/addons');
+var ItemList = require('./itemList');
 var ItemConstants = require('../constants/item');
+var classList = React.addons.classList;
 
 var Pane = React.createClass({
 
   render: function () {
-    var contents = 'Empty...';
+    var list = '';
 
-    if (this.props.contents && this.props.contents.length) {
-      contents = this.props.contents.map(function (item, i) {
-        var isActive = (item === this.props.active);
-        if (item.type === ItemConstants.DIRECTORY) {
-          return <Directory key={i} item={item} active={isActive} />;
-        } else {
-          return <File key={i} item={item} active={isActive} />;
-        }
-      }, this);
+    if (this.props.item) {
+      if (this.props.item.type === ItemConstants.DIRECTORY) {
+        list = <ItemList contents={this.props.item.contents} active={this.props.active} />;
+      } else {
+        list = (
+          <h1>{this.props.item.name}</h1>
+        );
+      }
     }
 
+    var classes = this.props.type + '-pane pane';
+
     return (
-      <div className={'pane ' + this.props.type}>
-        {contents}
+      <div className={classes}>
+        {list}
       </div>
     );
   }

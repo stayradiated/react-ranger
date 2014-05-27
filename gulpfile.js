@@ -19,6 +19,7 @@ gulp.task('watch', ['default'], function () {
   var bundler = watchify({ extensions: '.jsx' }).add('./example/app.jsx');
   bundler.transform(reactify);
   bundler.on('update', rebundle);
+  bundler.on('error', console.log.bind(console));
 
   function rebundle () {
     return bundler.bundle()

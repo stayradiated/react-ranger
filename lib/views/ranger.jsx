@@ -1,9 +1,17 @@
+var $ = require('jquery');
+var _ = require('lodash');
 var React = require('react');
 var Pane = require('./pane');
 var ItemConstants = require('../constants/item');
-var $ = require('jquery');
 
 var Ranger = React.createClass({
+
+  getDefaultProps: function () {
+    return {
+      data: {},
+      onExecute: _.noop
+    };
+  },
 
   getInitialState: function () {
     return {
@@ -18,6 +26,7 @@ var Ranger = React.createClass({
 
   handleKeyDown: function (e) {
     switch (e.keyCode) {
+      case 8:  // backspace
       case 37: // left
       case 72: // h
         this.out();
@@ -38,8 +47,9 @@ var Ranger = React.createClass({
         this.down();
         break;
 
-      default:
-        console.log(e.keyCode);
+      case 13: // enter
+        this.execute();
+        break;
     }
   },
 
@@ -76,33 +86,26 @@ var Ranger = React.createClass({
     });
   },
 
+  execute: function () {
+    var active = this.getActive();
+    if (! active) return;
+    if (active.type === ItemConstants.FILE) {
+      this.props.onExecute(active);
+    } else {
+      this.into();
+    }
+  },
 
   render: function () {
     var active = this.getActive() || {};
     var directory = this.state.directory;
     var parent = this.state.directory.parent;
 
-    var panes = [];
-
-    if (parent) {
-      panes.push(
-        <Pane type='parent' key={parent.path} contents={parent.contents} active={active.parent} />
-      );
-    } else {
-      panes.push(
-        <Pane type='parent' key='..' />
-      );
-    }
-
-    panes.push(
-      <Pane type='main' key={directory.path} contents={directory.contents} active={active} />
-    );
-
-    if (active && active.type === ItemConstants.DIRECTORY) {
-      panes.push(
-        <Pane type='contents' key={active.path} contents={active.contents} />
-      );
-    }
+    var panes = [
+      <Pane key='ParentPane' type='parent' item={parent} active={directory} />,
+      <Pane key='ActivePane' type='active' item={directory} active={active} />,
+      <Pane key='ContentsPane' type='contents' item={active} />
+    ];
 
     return (
       <div className='ranger' onClick={this.focus}>

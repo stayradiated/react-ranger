@@ -2,12 +2,21 @@ body {
   font-family: sans-serif;
 }
 
-.pane {
-  float: left;
-  width: 33%;
+.ranger:after {
+  content: '';
+  display: table;
+  clear: both;
 }
 
-.pane.parent .active {
+.pane {
+  float: left;
+  min-width: 33%;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+}
+
+.parent-pane .active {
   background: #ccc;
   color: #333;
 }
