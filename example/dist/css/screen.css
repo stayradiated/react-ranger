@@ -7,6 +7,11 @@ body {
   width: 33%;
 }
 
+.pane.parent .active {
+  background: #ccc;
+  color: #333;
+}
+
 .directory {
   font-weight: bold;
 }

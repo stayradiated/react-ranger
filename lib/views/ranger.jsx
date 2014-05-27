@@ -60,26 +60,37 @@ var Ranger = React.createClass({
   out: function () {
     if (! this.state.directory.parent) return;
     this.setState({
+      index: this.state.directory.parent.contents.indexOf(this.state.directory),
       directory: this.state.directory.parent
     });
   },
 
 
   render: function () {
-    var active = this.getActive();
+    var active = this.getActive() || {};
     var directory = this.state.directory;
     var parent = this.state.directory.parent;
 
-    var panes = [
-      <Pane key={directory.path} contents={directory.contents} active={active} />
-    ];
+    var panes = [];
 
     if (parent) {
-      panes.unshift(<Pane key={parent.path} contents={parent.contents} />);
+      panes.push(
+        <Pane type='parent' key={parent.path} contents={parent.contents} active={active.parent} />
+      );
+    } else {
+      panes.push(
+        <Pane type='parent' key='..' />
+      );
     }
 
+    panes.push(
+      <Pane type='main' key={directory.path} contents={directory.contents} active={active} />
+    );
+
     if (active && active.type === 'directory') {
-      panes.push(<Pane key={active.path} contents={active.contents} />);
+      panes.push(
+        <Pane type='contents' key={active.path} contents={active.contents} />
+      );
     }
 
     return (

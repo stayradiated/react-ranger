@@ -6,17 +6,21 @@ var Directory = require('./directory');
 var Pane = React.createClass({
 
   render: function () {
-    var contents = this.props.contents.map(function (item, i) {
-      var isActive = (item === this.props.active);
-      if (item.type === 'directory') {
-        return <Directory key={i} item={item} active={isActive} />;
-      } else {
-        return <File key={i} item={item} active={isActive} />;
-      }
-    }, this);
+    var contents = 'Empty...';
+
+    if (this.props.contents && this.props.contents.length) {
+      contents = this.props.contents.map(function (item, i) {
+        var isActive = (item === this.props.active);
+        if (item.type === 'directory') {
+          return <Directory key={i} item={item} active={isActive} />;
+        } else {
+          return <File key={i} item={item} active={isActive} />;
+        }
+      }, this);
+    }
 
     return (
-      <div className='pane'>
+      <div className={'pane ' + this.props.type}>
         {contents}
       </div>
     );
