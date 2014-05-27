@@ -1,4 +1,5 @@
 body {
+  margin: 0;
   font-family: sans-serif;
 }
 
@@ -9,11 +10,29 @@ body {
 }
 
 .pane {
-  float: left;
-  min-width: 33%;
-  padding: 20px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding: 10px;
   box-sizing: border-box;
-  border: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.parent-pane {
+  left: 0;
+  width: 20%;
+}
+
+.active-pane {
+  left: 20%;
+  width: 30%;
+}
+
+.contents-pane {
+  left: 50%;
+  width: 50%;
 }
 
 .parent-pane .active {
