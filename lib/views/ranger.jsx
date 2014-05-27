@@ -1,5 +1,6 @@
 var React = require('react');
 var Pane = require('./pane');
+var ItemConstants = require('../constants/item');
 var $ = require('jquery');
 
 var Ranger = React.createClass({
@@ -18,17 +19,27 @@ var Ranger = React.createClass({
   handleKeyDown: function (e) {
     switch (e.keyCode) {
       case 37: // left
+      case 72: // h
         this.out();
         break;
+
       case 38: // up
+      case 75: // k
         this.up();
         break;
+
       case 39: // right
+      case 76: // l
         this.into();
         break;
+
       case 40: // down
+      case 74: // j
         this.down();
         break;
+
+      default:
+        console.log(e.keyCode);
     }
   },
 
@@ -50,7 +61,7 @@ var Ranger = React.createClass({
 
   into: function () {
     var active = this.getActive();
-    if (! active || active.type !== 'directory') return;
+    if (! active || active.type !== ItemConstants.DIRECTORY) return;
     this.setState({
       index: 0,
       directory: active
@@ -87,7 +98,7 @@ var Ranger = React.createClass({
       <Pane type='main' key={directory.path} contents={directory.contents} active={active} />
     );
 
-    if (active && active.type === 'directory') {
+    if (active && active.type === ItemConstants.DIRECTORY) {
       panes.push(
         <Pane type='contents' key={active.path} contents={active.contents} />
       );
