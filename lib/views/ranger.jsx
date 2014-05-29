@@ -2,13 +2,14 @@ var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
 var Pane = require('./pane');
-var ItemConstants = require('../constants/item');
+var File = require('../models/file');
+var Directory = require('../models/directory');
 
 var Ranger = React.createClass({
 
   getDefaultProps: function () {
     return {
-      data: {},
+      data: null,
       onExecute: _.noop
     };
   },
@@ -54,7 +55,7 @@ var Ranger = React.createClass({
   },
 
   getActive: function () {
-    return this.state.directory.contents[this.state.index];
+    return this.state.directory.contents.at(this.state.index);
   },
 
   up: function () {
@@ -65,13 +66,13 @@ var Ranger = React.createClass({
 
   down: function () {
     this.setState({
-      index: Math.min(this.state.index + 1, this.state.directory.contents.length - 1)
+      index: Math.min(this.state.index + 1, this.state.directory.contents.max())
     });
   },
 
   into: function () {
     var active = this.getActive();
-    if (! active || active.type !== ItemConstants.DIRECTORY) return;
+    if (! (active instanceof Directory)) return;
     this.setState({
       index: 0,
       directory: active
@@ -89,7 +90,7 @@ var Ranger = React.createClass({
   execute: function () {
     var active = this.getActive();
     if (! active) return;
-    if (active.type === ItemConstants.FILE) {
+    if (active instanceof File) {
       this.props.onExecute(active);
     } else {
       this.into();

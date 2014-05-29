@@ -1,7 +1,7 @@
 var React = require('react/addons');
 var ItemList = require('./itemList');
-var ItemConstants = require('../constants/item');
 var classList = React.addons.classList;
+var Directory = require('../models/directory');
 
 var Pane = React.createClass({
 
@@ -9,7 +9,7 @@ var Pane = React.createClass({
     var list = '';
 
     if (this.props.item) {
-      if (this.props.item.type === ItemConstants.DIRECTORY) {
+      if (this.props.item instanceof Directory) {
         list = <ItemList contents={this.props.item.contents} active={this.props.active} />;
       } else {
         list = (
