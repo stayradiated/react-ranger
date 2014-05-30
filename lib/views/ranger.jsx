@@ -16,7 +16,6 @@ var Ranger = React.createClass({
 
   getInitialState: function () {
     return {
-      index: 0,
       directory: this.props.data
     };
   },
@@ -54,41 +53,29 @@ var Ranger = React.createClass({
     }
   },
 
-  getActive: function () {
-    return this.state.directory.contents.at(this.state.index);
-  },
-
   up: function () {
-    this.setState({
-      index: Math.max(this.state.index - 1, 0)
-    });
+    this.state.directory.contents.prev();
+    this.setState({ directory: this.state.directory });
   },
 
   down: function () {
-    this.setState({
-      index: Math.min(this.state.index + 1, this.state.directory.contents.max())
-    });
+    this.state.directory.contents.next();
+    this.setState({ directory: this.state.directory });
   },
 
   into: function () {
-    var active = this.getActive();
+    var active = this.state.directory.contents.active();
     if (! (active instanceof Directory)) return;
-    this.setState({
-      index: 0,
-      directory: active
-    });
+    this.setState({ directory: active });
   },
 
   out: function () {
     if (! this.state.directory.parent) return;
-    this.setState({
-      index: this.state.directory.parent.contents.indexOf(this.state.directory),
-      directory: this.state.directory.parent
-    });
+    this.setState({ directory: this.state.directory.parent });
   },
 
   execute: function () {
-    var active = this.getActive();
+    var active = this.state.directory.contents.active();
     if (! active) return;
     if (active instanceof File) {
       this.props.onExecute(active);
@@ -98,14 +85,15 @@ var Ranger = React.createClass({
   },
 
   render: function () {
-    var active = this.getActive() || {};
+    var active = this.state.directory.contents.active() || {};
     var directory = this.state.directory;
     var parent = this.state.directory.parent;
+    var child = active.contents && active.contents.active();
 
     var panes = [
       <Pane key='ParentPane' type='parent' item={parent} active={directory} />,
       <Pane key='ActivePane' type='active' item={directory} active={active} />,
-      <Pane key='ContentsPane' type='contents' item={active} />
+      <Pane key='ContentsPane' type='contents' item={active} active={child} />
     ];
 
     return (

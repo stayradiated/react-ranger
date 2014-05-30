@@ -40,6 +40,11 @@ body {
   color: #333;
 }
 
+.contents-pane .active {
+  background: #ccc;
+  color: #333;
+}
+
 .directory {
   font-weight: bold;
 }
