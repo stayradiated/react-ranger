@@ -4,46 +4,22 @@
 
 Uses React.
 
-## Structure
+## Usage
 
-```json
-{
-    "type": "folder",
-    "name": "root",
-    "contents": [
-        {
-            "type": "folder",
-            "name": "bin",
-            "contents": [ ... ]
-        },
-        {
-            "type": "folder",
-            "name": "etc",
-            "contents": [ ... ]
-        },
-        {
-            "type": "folder",
-            "name": "home",
-            "contents": [
-                {
-                    "type": "folder",
-                    "name": "stayradiated",
-                    "contents": [
-                        "type": "folder",
-                        "name": ".vim",
-                        "contents": [ ... ]
-                    ]
-                },
-                {
-                    "type": "file",
-                    "name": ".vimrc"
-                },
-                {
-                    "type": "file",
-                    "name": ".zshrc"
-                }
-            ]
-        }
-    ]
-}
+```javscript
+var React = require('react');
+var Ranger = require('ranger');
+
+var files = [
+    'code/test.txt',
+    'code/makefile',
+    'readme.md',
+];
+
+React.renderComponent(new Ranger({
+    data: Ranger.parseList(files),
+    onExecute: function (item) {
+        console.log('opening', item);
+    }
+}, document.body);
 ```
