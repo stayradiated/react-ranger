@@ -7,10 +7,10 @@ var File = require('../../lib/models/file');
 describe('directory', function () {
 
   it('should create a new instance', function () {
-    var name = 'folder';
-    var dir = new Directory(name);
-    assert.equal(dir.name, name);
-    assert.equal(dir.path, name + '/');
+    var dir = new Directory('folder');
+    assert.equal(dir.name, 'folder');
+    assert.equal(dir.path, 'folder/');
+    assert.equal(dir.parent, null);
     assert(dir.contents instanceof ItemList);
   });
 
