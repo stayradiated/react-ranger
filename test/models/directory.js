@@ -1,0 +1,39 @@
+var sinon = require('sinon');
+var assert = require('chai').assert;
+var Directory = require('../../lib/models/directory');
+var ItemList = require('../../lib/models/itemList');
+var File = require('../../lib/models/file');
+
+describe('directory', function () {
+
+  it('should create a new instance', function () {
+    var name = 'folder';
+    var dir = new Directory(name);
+    assert.equal(dir.name, name);
+    assert.equal(dir.path, name + '/');
+    assert(dir.contents instanceof ItemList);
+  });
+
+  it('should set the parent', function () {
+    var child = new Directory('child');
+    var parent = new Directory('parent');
+    assert.equal(child.path, 'child/');
+
+    // set child.parent as parent
+    child.setParent(parent);
+    assert.equal(child.parent, parent);
+    assert.equal(child.path, 'parent/child/');
+  });
+
+  it('should listen to this.contents for _onAdd', function () {
+    var dir = new Directory('root');
+    var item = new File('file');
+    var spy = sinon.stub(item, 'setParent');
+
+    // add item to dir
+    dir.contents.add(item);
+    assert(spy.calledOnce);
+    assert.deepEqual(spy.args, [[dir]]);
+  });
+
+});

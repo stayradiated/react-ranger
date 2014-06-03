@@ -12,10 +12,16 @@
   "bugs": {
     "url": "https://github.com/stayradiated/ranger/issues"
   },
+  "scripts": {
+    "test": "mocha -R spec test/*"
+  },
   "dependencies": {
+    "chai": "^1.9.1",
     "jquery": "^2.1.1",
     "lodash": "^2.4.1",
-    "react": "^0.10.0"
+    "mocha": "^1.20.0",
+    "react": "^0.10.0",
+    "sinon": "^1.10.2"
   },
   "devDependencies": {
     "browserify": "^4.1.5",
