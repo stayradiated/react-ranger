@@ -1,16 +1,16 @@
 {
-  "name": "ranger",
+  "name": "react-ranger",
   "version": "0.3.0",
-  "description": "A column browser for browsers",
+  "description": "A column browser for the browser",
   "main": "pkg/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/stayradiated/ranger.git"
+    "url": "git://github.com/stayradiated/react-ranger.git"
   },
   "author": "George Czabania",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/stayradiated/ranger/issues"
+    "url": "https://github.com/stayradiated/react-ranger/issues"
   },
   "scripts": {
     "test": "mocha -R spec test/*"
