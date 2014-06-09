@@ -88,7 +88,7 @@ var Ranger = React.createClass({
     var active = this.state.directory.contents.active() || {};
     var directory = this.state.directory;
     var parent = this.state.directory.parent;
-    var child = active.contents && active.contents.active();
+    var child = (active.contents instanceof Directory) && active.contents.active();
 
     var panes = [
       <Pane key='ParentPane' type='parent' item={parent} active={directory} />,

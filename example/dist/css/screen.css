@@ -1,7 +1,8 @@
-body {
-  margin: 0;
-  font-family: sans-serif;
-}
+/*
+ * RECOMMENDED
+ */
+
+/* clearfix */
 
 .ranger:after {
   content: '';
@@ -73,4 +74,14 @@ input {
   opacity: 0;
   width: 0;
   height: 0;
+}
+
+
+/*
+ * EXAMPLE APP ONLY
+ */
+
+body {
+  margin: 0;
+  font-family: sans-serif;
 }
