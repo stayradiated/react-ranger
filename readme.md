@@ -17,7 +17,7 @@ var files = [
 ];
 
 React.renderComponent(new Ranger({
-    data: Ranger.parseList(files),
+    initialDir: Ranger.parseList(files),
     onExecute: function (item) {
         console.log('opening', item);
     }

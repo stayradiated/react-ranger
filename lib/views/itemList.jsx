@@ -1,10 +1,16 @@
 var _ = require('lodash');
 var React = require('react');
+
 var File = require('./file');
 var Directory = require('./directory');
+var ItemListModel = require('../models/itemList');
 var DirectoryModel = require('../models/directory');
 
 var ItemList = React.createClass({
+
+  propTypes: {
+    contents: React.PropTypes.instanceOf(ItemListModel).isRequired
+  },
 
   render: function () {
     var contents = '';
@@ -13,17 +19,17 @@ var ItemList = React.createClass({
       contents = this.props.contents.map(function (item, i) {
         var isActive = (item === this.props.active);
         if (item instanceof DirectoryModel) {
-          return <Directory key={i} item={item} active={isActive} />;
+          return new Directory({key: i, item: item, active: isActive});
         } else {
-          return <File key={i} item={item} active={isActive} />;
+          return new File({key: i, item: item, active: isActive});
         }
       }, this);
     }
 
     return (
-      <div className='item-list'>
-        {contents}
-      </div>
+      /* jshint ignore: start */
+      <div className='item-list'>{contents}</div>
+      /* jshint ignore: end */
     );
   }
 

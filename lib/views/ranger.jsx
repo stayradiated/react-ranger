@@ -1,22 +1,30 @@
 var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
+
 var Pane = require('./pane');
 var File = require('../models/file');
 var Directory = require('../models/directory');
+var RangerUtils = require('../utils');
 
 var Ranger = React.createClass({
 
+  statics: RangerUtils,
+
+  propTypes: {
+    initialDir: React.PropTypes.instanceOf(Directory).isRequired,
+    onExecute: React.PropTypes.func
+  },
+
   getDefaultProps: function () {
     return {
-      data: null,
       onExecute: _.noop
     };
   },
 
   getInitialState: function () {
     return {
-      directory: this.props.data
+      directory: this.props.initialDir
     };
   },
 
@@ -51,6 +59,9 @@ var Ranger = React.createClass({
         this.execute();
         break;
     }
+
+    e.preventDefault();
+    return false;
   },
 
   up: function () {
@@ -91,16 +102,20 @@ var Ranger = React.createClass({
     var child = (active.contents instanceof Directory) && active.contents.active();
 
     var panes = [
+      /* jshint ignore: start */
       <Pane key='ParentPane' type='parent' item={parent} active={directory} />,
       <Pane key='ActivePane' type='active' item={directory} active={active} />,
       <Pane key='ContentsPane' type='contents' item={active} active={child} />
+      /* jshint ignore: end */
     ];
 
     return (
+      /* jshint ignore: start */
       <div className='ranger' onClick={this.focus}>
         {panes}
         <input type='text' ref='input' onKeyDown={this.handleKeyDown} />
       </div>
+      /* jshint ignore: end */
     );
   }
 

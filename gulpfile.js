@@ -16,13 +16,23 @@ gulp.task('package', function () {
 });
 
 gulp.task('watch', ['default'], function () {
-  var bundler = watchify({ extensions: '.jsx' }).add('./example/app.jsx');
+  var bundler = watchify(browserify({
+    cache: {},
+    packageCache: {},
+    fullPaths: true,
+    extensions: '.jsx'
+  }));
+
+  bundler.add('./example/app.jsx');
   bundler.transform(reactify);
   bundler.on('update', rebundle);
-  bundler.on('error', console.log.bind(console));
 
   function rebundle () {
+    console.log('rebundling');
     return bundler.bundle()
+      .on('error', function (err) {
+        console.log(err.message);
+      })
       .pipe(source('app.js'))
       .pipe(gulp.dest('./example/dist/js'))
       .pipe(connect.reload());
