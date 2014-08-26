@@ -16,6 +16,10 @@ var File = React.createClass({
     };
   },
 
+  handleClick: function () {
+    console.log('clicky click', this.props);
+  },
+
   render: function () {
     var classes = classSet({
       file: true,
@@ -24,7 +28,7 @@ var File = React.createClass({
 
     return (
       /* jshint ignore: start */
-      <div className={classes}>
+      <div className={classes} onClick={this.handleClick}>
         {this.props.item.name}
       </div>
       /* jshint ignore: end */

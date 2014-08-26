@@ -24,12 +24,26 @@ var Ranger = React.createClass({
 
   getInitialState: function () {
     return {
-      directory: this.props.initialDir
+      directory: this.props.initialDir,
+      hasFocus: false,
     };
   },
 
-  focus: function () {
+  handleMouseDown: function (e) {
+    e.preventDefault();
     $(this.refs.input.getDOMNode()).focus();
+  },
+
+  handleFocus: function () {
+    this.setState({
+      hasFocus: true
+    });
+  },
+
+  handleBlur: function () {
+    this.setState({
+      hasFocus: false
+    });
   },
 
   handleKeyDown: function (e) {
@@ -37,7 +51,7 @@ var Ranger = React.createClass({
       case 8:  // backspace
       case 37: // left
       case 72: // h
-        this.out();
+        this.openParent();
         break;
 
       case 38: // up
@@ -47,7 +61,7 @@ var Ranger = React.createClass({
 
       case 39: // right
       case 76: // l
-        this.into();
+        this.openDirectory();
         break;
 
       case 40: // down
@@ -58,6 +72,9 @@ var Ranger = React.createClass({
       case 13: // enter
         this.execute();
         break;
+
+      default:
+        return true;
     }
 
     e.preventDefault();
@@ -74,13 +91,13 @@ var Ranger = React.createClass({
     this.setState({ directory: this.state.directory });
   },
 
-  into: function () {
+  openDirectory: function () {
     var active = this.state.directory.contents.active();
     if (! (active instanceof Directory)) return;
     this.setState({ directory: active });
   },
 
-  out: function () {
+  openParent: function () {
     if (! this.state.directory.parent) return;
     this.setState({ directory: this.state.directory.parent });
   },
@@ -91,7 +108,7 @@ var Ranger = React.createClass({
     if (active instanceof File) {
       this.props.onExecute(active);
     } else {
-      this.into();
+      this.openDirectory();
     }
   },
 
@@ -109,11 +126,20 @@ var Ranger = React.createClass({
       /* jshint ignore: end */
     ];
 
+    var classes = React.addons.classSet({
+      ranger: true,
+      focus: this.state.hasFocus
+    });
+
     return (
       /* jshint ignore: start */
-      <div className='ranger' onClick={this.focus}>
+      <div className={classes} onMouseDown={this.handleMouseDown}>
         {panes}
-        <input type='text' ref='input' onKeyDown={this.handleKeyDown} />
+        <input type='text' ref='input'
+          onKeyDown={this.handleKeyDown}
+          onFocus={this.handleFocus}
+          onBlur={this.handleBlur}
+        />
       </div>
       /* jshint ignore: end */
     );
