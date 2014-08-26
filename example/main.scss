@@ -12,6 +12,7 @@ body {
  */
 
 .ranger {
+  cursor: default;
   user-select: none;
 
   // clearfix
@@ -42,8 +43,6 @@ body {
     padding: 10px;
     box-sizing: border-box;
     border-right: 1px solid #ccc;
-    overflow-y: auto;
-    overflow-x: hidden;
   }
 
   .parent-pane {
@@ -59,6 +58,21 @@ body {
   .contents-pane {
     left: 50%;
     width: 50%;
+  }
+
+
+  /*
+   * ITEM LIST
+   */
+
+  .item-list {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   /*
@@ -83,12 +97,13 @@ body {
     content: '/'
   }
 
-  .file {
-  }
-
   .file, .directory {
     line-height: 40px;
     padding: 0 10px;
+
+    &:active {
+      background: #eee;
+    }
   }
 
 }

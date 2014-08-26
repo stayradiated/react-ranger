@@ -1,18 +1,22 @@
+'use strict';
+
 var React = require('react');
 var Ranger = require('../lib');
+var files;
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  React.renderComponent(new Ranger({
-    initialDir: Ranger.parseList(files),
-    onExecute: function (item) {
+  var rootDir = Ranger.parseList(files);
+
+  var store = Ranger.createStore(rootDir, function (item) {
       console.log('opening', item);
-    }
-  }), document.body);
+  });
+
+  React.renderComponent(new Ranger({ store: store }), document.body);
 
 });
 
-var files = [
+files = [
 '.agignore',
 '.DS_Store',
 '.npmignore',
