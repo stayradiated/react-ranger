@@ -1,6 +1,6 @@
 {
   "name": "react-ranger",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A column browser for the browser",
   "main": "pkg/index.js",
   "repository": {
