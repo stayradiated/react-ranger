@@ -1,6 +1,6 @@
 {
   "name": "react-ranger",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A column browser for the browser",
   "main": "pkg/index.js",
   "repository": {
@@ -16,12 +16,12 @@
     "test": "mocha -R spec test/*"
   },
   "dependencies": {
-    "jquery": "^2.1.1",
     "lodash": "^2.4.1",
     "react": "^0.11.1",
     "reflux": "^0.1.7"
   },
   "devDependencies": {
+    "jquery": "^2.1.1",
     "browserify": "^5.9.1",
     "chai": "^1.9.1",
     "gulp": "^3.8.7",

@@ -1,6 +1,5 @@
 'use strict';
 
-var $ = require('jquery');
 var React = require('react');
 var Reflux = require('reflux');
 
@@ -35,7 +34,7 @@ var Ranger = React.createClass({
 
   handleMouseDown: function (e) {
     e.preventDefault();
-    $(this.refs.input.getDOMNode()).focus();
+    this.refs.input.getDOMNode().focus();
   },
 
   handleFocus: function () {
@@ -88,7 +87,7 @@ var Ranger = React.createClass({
   render: function () {
     var currentDir = this.props.store.getCurrentDir();
 
-    var active = currentDir.contents.active() || {};
+    var active = currentDir.contents.active() || false;
     var directory = currentDir;
     var parent = currentDir.parent;
     var child = (active.contents instanceof Directory) && active.contents.active();
