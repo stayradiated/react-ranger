@@ -10,13 +10,13 @@ Uses React.
 var React = require('react');
 var Ranger = require('ranger');
 
-var files = React.parseList([
+var files = Ranger.parseList([
     'code/test.txt',
     'code/makefile',
     'readme.md',
 ]);
 
-var store = React.createStore(files, function (item) {
+var store = Ranger.createStore(files, function (item) {
   console.log('opening', item);
 });
 
