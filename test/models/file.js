@@ -1,3 +1,5 @@
+'use strict';
+
 var assert = require('chai').assert;
 var File = require('../../lib/models/file');
 var Directory = require('../../lib/models/directory');

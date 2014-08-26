@@ -1,35 +1,53 @@
-var $ = require('jquery');
-var _ = require('lodash');
-var React = require('react');
+'use strict';
 
-var Pane = require('./pane');
-var File = require('../models/file');
+var $ = require('jquery');
+var React = require('react');
+var Reflux = require('reflux');
+
 var Directory = require('../models/directory');
-var RangerUtils = require('../utils');
+var StoreFactory = require('../store');
+var Pane = require('./pane');
+var utils = require('../utils');
 
 var Ranger = React.createClass({
 
-  statics: RangerUtils,
-
-  propTypes: {
-    initialDir: React.PropTypes.instanceOf(Directory).isRequired,
-    onExecute: React.PropTypes.func
+  statics: {
+    createStore: StoreFactory,
+    parseList: utils.parseList,
+    parseFiles: utils.parseFiles,
   },
 
-  getDefaultProps: function () {
-    return {
-      onExecute: _.noop
-    };
+  mixins: [Reflux.ListenerMixin],
+
+  propTypes: {
+    store: React.PropTypes.any.isRequired
   },
 
   getInitialState: function () {
     return {
-      directory: this.props.initialDir
+      hasFocus: false,
     };
   },
 
-  focus: function () {
+  componentDidMount: function () {
+    this.listenTo(this.props.store, this._onChange);
+  },
+
+  handleMouseDown: function (e) {
+    e.preventDefault();
     $(this.refs.input.getDOMNode()).focus();
+  },
+
+  handleFocus: function () {
+    this.setState({
+      hasFocus: true
+    });
+  },
+
+  handleBlur: function () {
+    this.setState({
+      hasFocus: false
+    });
   },
 
   handleKeyDown: function (e) {
@@ -37,87 +55,74 @@ var Ranger = React.createClass({
       case 8:  // backspace
       case 37: // left
       case 72: // h
-        this.out();
+        this.props.store.openParent();
         break;
 
       case 38: // up
       case 75: // k
-        this.up();
+        this.props.store.up();
         break;
 
       case 39: // right
       case 76: // l
-        this.into();
+        this.props.store.openDirectory();
         break;
 
       case 40: // down
       case 74: // j
-        this.down();
+        this.props.store.down();
         break;
 
       case 13: // enter
-        this.execute();
+        this.props.store.execute();
         break;
+
+      default:
+        return true;
     }
 
     e.preventDefault();
     return false;
   },
 
-  up: function () {
-    this.state.directory.contents.prev();
-    this.setState({ directory: this.state.directory });
-  },
-
-  down: function () {
-    this.state.directory.contents.next();
-    this.setState({ directory: this.state.directory });
-  },
-
-  into: function () {
-    var active = this.state.directory.contents.active();
-    if (! (active instanceof Directory)) return;
-    this.setState({ directory: active });
-  },
-
-  out: function () {
-    if (! this.state.directory.parent) return;
-    this.setState({ directory: this.state.directory.parent });
-  },
-
-  execute: function () {
-    var active = this.state.directory.contents.active();
-    if (! active) return;
-    if (active instanceof File) {
-      this.props.onExecute(active);
-    } else {
-      this.into();
-    }
-  },
-
   render: function () {
-    var active = this.state.directory.contents.active() || {};
-    var directory = this.state.directory;
-    var parent = this.state.directory.parent;
+    var currentDir = this.props.store.getCurrentDir();
+
+    var active = currentDir.contents.active() || {};
+    var directory = currentDir;
+    var parent = currentDir.parent;
     var child = (active.contents instanceof Directory) && active.contents.active();
 
     var panes = [
       /* jshint ignore: start */
-      <Pane key='ParentPane' type='parent' item={parent} active={directory} />,
-      <Pane key='ActivePane' type='active' item={directory} active={active} />,
-      <Pane key='ContentsPane' type='contents' item={active} active={child} />
+      <Pane key='ParentPane' type='parent' item={parent} active={directory} store={this.props.store} />,
+      <Pane key='ActivePane' type='active' item={directory} active={active} store={this.props.store} />,
+      <Pane key='ContentsPane' type='contents' item={active} active={child} store={this.props.store} />
       /* jshint ignore: end */
     ];
 
+    var classes = React.addons.classSet({
+      ranger: true,
+      focus: this.state.hasFocus
+    });
+
     return (
       /* jshint ignore: start */
-      <div className='ranger' onClick={this.focus}>
+      <div className={classes} onMouseDown={this.handleMouseDown}>
         {panes}
-        <input type='text' ref='input' onKeyDown={this.handleKeyDown} />
+        <input type='text' ref='input'
+          onKeyDown={this.handleKeyDown}
+          onFocus={this.handleFocus}
+          onBlur={this.handleBlur}
+        />
       </div>
       /* jshint ignore: end */
     );
-  }
+  },
+
+  _onChange: function () {
+    this.forceUpdate();
+  },
 
 });
 

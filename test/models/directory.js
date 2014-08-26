@@ -1,3 +1,5 @@
+'use strict';
+
 var sinon = require('sinon');
 var assert = require('chai').assert;
 var Directory = require('../../lib/models/directory');
@@ -25,13 +27,13 @@ describe('directory', function () {
     assert.equal(child.path, 'parent/child/');
   });
 
-  it('should listen to this.contents for _onAdd', function () {
+  it('should listen to this.contents for _onPush', function () {
     var dir = new Directory('root');
     var item = new File('file');
     var spy = sinon.stub(item, 'setParent');
 
-    // add item to dir
-    dir.contents.add(item);
+    // push item to dir
+    dir.contents.push(item);
     assert(spy.calledOnce);
     assert.deepEqual(spy.args, [[dir]]);
   });
