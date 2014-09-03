@@ -15,7 +15,8 @@ var Pane = React.createClass({
       React.PropTypes.instanceOf(DirectoryModel),
       React.PropTypes.instanceOf(FileModel),
       React.PropTypes.bool,
-    ])
+    ]),
+    View: React.PropTypes.any,
   },
 
   render: function () {
@@ -29,7 +30,11 @@ var Pane = React.createClass({
           store: this.props.store,
         });
       } else {
-        list = new React.DOM.h1(null, this.props.item.name);
+        if (this.props.view) {
+          list = this.props.view({ item: this.props.item });
+        } else {
+          list = this.props.item.name;
+        }
       }
     }
 

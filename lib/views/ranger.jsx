@@ -19,7 +19,8 @@ var Ranger = React.createClass({
   mixins: [Reflux.ListenerMixin],
 
   propTypes: {
-    store: React.PropTypes.any.isRequired
+    store: React.PropTypes.any.isRequired,
+    view: React.PropTypes.any.isRequired,
   },
 
   getInitialState: function () {
@@ -94,9 +95,22 @@ var Ranger = React.createClass({
 
     var panes = [
       /* jshint ignore: start */
-      <Pane key='ParentPane' type='parent' item={parent} active={directory} store={this.props.store} />,
-      <Pane key='ActivePane' type='active' item={directory} active={active} store={this.props.store} />,
-      <Pane key='ContentsPane' type='contents' item={active} active={child} store={this.props.store} />
+      <Pane key='parent' type='parent'
+        item={parent}
+        active={directory}
+        store={this.props.store}
+      />,
+      <Pane key='active' type='active'
+        item={directory}
+        active={active}
+        store={this.props.store}
+      />,
+      <Pane key='contents' type='contents'
+        item={active}
+        active={child}
+        store={this.props.store}
+        view={this.props.view}
+      />
       /* jshint ignore: end */
     ];
 
