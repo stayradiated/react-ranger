@@ -58,6 +58,14 @@ body {
   .contents-pane {
     left: 50%;
     width: 50%;
+    border-right: 0;
+  }
+
+  &.hide-parent {
+    .active-pane {
+      left: 0;
+      width: 50%;
+    }
   }
 
 

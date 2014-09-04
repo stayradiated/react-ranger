@@ -21,6 +21,7 @@ var Ranger = React.createClass({
   propTypes: {
     store: React.PropTypes.any.isRequired,
     view: React.PropTypes.any.isRequired,
+    hideParent: React.PropTypes.bool,
   },
 
   getInitialState: function () {
@@ -95,11 +96,6 @@ var Ranger = React.createClass({
 
     var panes = [
       /* jshint ignore: start */
-      <Pane key='parent' type='parent'
-        item={parent}
-        active={directory}
-        store={this.props.store}
-      />,
       <Pane key='active' type='active'
         item={directory}
         active={active}
@@ -114,9 +110,22 @@ var Ranger = React.createClass({
       /* jshint ignore: end */
     ];
 
+    if (! this.props.hideParent) {
+      panes.push(
+        /* jshint ignore: start */
+        <Pane key='parent' type='parent'
+          item={parent}
+          active={directory}
+          store={this.props.store}
+        />
+        /* jshint ignore: end */
+      );
+    }
+
     var classes = React.addons.classSet({
-      ranger: true,
-      focus: this.state.hasFocus
+      'ranger': true,
+      'focus': this.state.hasFocus,
+      'hide-parent': this.props.hideParent,
     });
 
     return (
