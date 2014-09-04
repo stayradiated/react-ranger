@@ -24,11 +24,23 @@ var ItemList = React.createClass({
 
   componentDidUpdate: function() {
     if (! this.refs.active) { return; }
-    var active = this.refs.active.getDOMNode();
-    var node = this.getDOMNode();
+    var item = this.refs.active.getDOMNode();
+    var container = this.getDOMNode();
 
-    node.scrollTop = active.offsetTop - (node.offsetHeight / 2);
+    var itemOffsetTop = item.offsetTop;
+    var containerScrollTop = container.scrollTop;
 
+    if (itemOffsetTop < containerScrollTop) {
+      container.scrollTop = itemOffsetTop;
+      return;
+    }
+
+    var itemOffsetHeight = item.offsetHeight;
+    var containerOffsetHeight = container.offsetHeight;
+
+    if (itemOffsetTop + itemOffsetHeight > containerScrollTop + containerOffsetHeight) {
+      container.scrollTop = itemOffsetTop - containerOffsetHeight + itemOffsetHeight;
+    }
   },
 
   render: function () {

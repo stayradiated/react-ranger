@@ -34,7 +34,7 @@ var Ranger = React.createClass({
     this.listenTo(this.props.store, this._onChange);
   },
 
-  handleMouseDown: function (e) {
+  focus: function (e) {
     e.preventDefault();
     this.refs.input.getDOMNode().focus();
   },
@@ -130,7 +130,7 @@ var Ranger = React.createClass({
 
     return (
       /* jshint ignore: start */
-      <div className={classes} onMouseDown={this.handleMouseDown}>
+      <div tabIndex='-1' className={classes} onFocus={this.focus} onMouseDown={this.focus}>
         {panes}
         <input type='text' ref='input'
           onKeyDown={this.handleKeyDown}
