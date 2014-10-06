@@ -26,7 +26,6 @@ $(function () {
   React.renderComponent(new Ranger({
     store: store,
     view: ItemView,
-    hideParent: true,
   }), document.body);
 
   $.get('files.json').then(function (content) {
