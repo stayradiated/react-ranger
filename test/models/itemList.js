@@ -43,6 +43,12 @@ describe('ItemList', function () {
     assert.equal(itemList.length(), 1);
   });
 
+  it('should get a child by it\'s name', function () {
+    assert.equal(itemList.get('file'), undefined);
+    itemList.push(file);
+    assert.equal(itemList.get('file'), file);
+  });
+
   it('should map', function () {
     var spy = sinon.spy();
     itemList.push(file);

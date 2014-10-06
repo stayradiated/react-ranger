@@ -3,7 +3,8 @@
 var React = require('react');
 var Reflux = require('reflux');
 
-var Directory = require('../models/directory');
+var DirectoryModel = require('../models/directory');
+var FileModel = require('../models/file');
 var StoreFactory = require('../store');
 var Pane = require('./pane');
 var utils = require('../utils');
@@ -14,6 +15,8 @@ var Ranger = React.createClass({
     createStore: StoreFactory,
     parseList: utils.parseList,
     parseFiles: utils.parseFiles,
+    File: FileModel,
+    Directory: DirectoryModel,
   },
 
   mixins: [Reflux.ListenerMixin],
@@ -21,7 +24,13 @@ var Ranger = React.createClass({
   propTypes: {
     store: React.PropTypes.any.isRequired,
     view: React.PropTypes.any.isRequired,
-    hideParent: React.PropTypes.bool,
+    showParent: React.PropTypes.bool,
+  },
+
+  getDefaultProps: function () {
+    return {
+      showParent: true,
+    };
   },
 
   getInitialState: function () {
@@ -92,7 +101,7 @@ var Ranger = React.createClass({
     var active = currentDir.contents.active() || false;
     var directory = currentDir;
     var parent = currentDir.parent;
-    var child = (active.contents instanceof Directory) && active.contents.active();
+    var child = (active.contents instanceof DirectoryModel) && active.contents.active();
 
     var panes = [
       /* jshint ignore: start */
@@ -110,7 +119,7 @@ var Ranger = React.createClass({
       /* jshint ignore: end */
     ];
 
-    if (! this.props.hideParent) {
+    if (this.props.showParent) {
       panes.push(
         /* jshint ignore: start */
         <Pane key='parent' type='parent'
@@ -125,7 +134,7 @@ var Ranger = React.createClass({
     var classes = React.addons.classSet({
       'ranger': true,
       'focus': this.state.hasFocus,
-      'hide-parent': this.props.hideParent,
+      'hide-parent': ! this.props.showParent,
     });
 
     return (
