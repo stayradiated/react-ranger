@@ -22,6 +22,10 @@ var File = React.createClass({
     this.props.store.jumpTo(this.props.item);
   },
 
+  handleDoubleClick: function () { 
+    this.props.store.execute();
+  },
+
   render: function () {
     var classes = React.addons.classSet({
       file: true,
@@ -30,7 +34,9 @@ var File = React.createClass({
 
     return (
       /* jshint ignore: start */
-      <div className={classes} onClick={this.handleClick}>
+      <div className={classes}
+        onClick={this.handleClick}
+        onDoubleClick={this.handleDoubleClick}>
         {this.props.item.name}
       </div>
       /* jshint ignore: end */

@@ -10,13 +10,12 @@ var Pane = React.createClass({
 
   propTypes: {
     store: React.PropTypes.any.isRequired,
-    type: React.PropTypes.string.isRequired,
     active: React.PropTypes.oneOfType([
       React.PropTypes.instanceOf(DirectoryModel),
       React.PropTypes.instanceOf(FileModel),
       React.PropTypes.bool,
     ]),
-    View: React.PropTypes.any,
+    view: React.PropTypes.any,
   },
 
   render: function () {
@@ -38,11 +37,9 @@ var Pane = React.createClass({
       }
     }
 
-    var classes = this.props.type + '-pane pane';
-
     return (
       /* jshint ignore: start */
-      <div className={classes}>
+      <div className='pane'>
         {list}
       </div>
       /* jshint ignore: end */

@@ -4,10 +4,12 @@ var React = require('react');
 var Reflux = require('reflux');
 
 var DirectoryModel = require('../models/directory');
-var FileModel = require('../models/file');
-var StoreFactory = require('../store');
-var Pane = require('./pane');
-var utils = require('../utils');
+var FileModel      = require('../models/file');
+var StoreFactory   = require('../store');
+var utils          = require('../utils');
+
+var Pane           = require('./pane');
+var Status         = require('./status');
 
 var Ranger = React.createClass({
 
@@ -24,13 +26,6 @@ var Ranger = React.createClass({
   propTypes: {
     store: React.PropTypes.any.isRequired,
     view: React.PropTypes.any.isRequired,
-    showParent: React.PropTypes.bool,
-  },
-
-  getDefaultProps: function () {
-    return {
-      showParent: true,
-    };
   },
 
   getInitialState: function () {
@@ -41,6 +36,11 @@ var Ranger = React.createClass({
 
   componentDidMount: function () {
     this.listenTo(this.props.store, this._onChange);
+  },
+
+  componentDidUpdate: function () {
+    var el = this.refs.container.getDOMNode();
+    el.scrollLeft = el.scrollWidth;
   },
 
   focus: function (e) {
@@ -98,49 +98,55 @@ var Ranger = React.createClass({
   render: function () {
     var currentDir = this.props.store.getCurrentDir();
 
-    var active = currentDir.contents.active() || false;
     var directory = currentDir;
-    var parent = currentDir.parent;
+    var active = currentDir.contents.active() || false;
     var child = (active.contents instanceof DirectoryModel) && active.contents.active();
 
-    var panes = [
-      /* jshint ignore: start */
-      <Pane key='active' type='active'
-        item={directory}
-        active={active}
-        store={this.props.store}
-      />,
-      <Pane key='contents' type='contents'
-        item={active}
-        active={child}
-        store={this.props.store}
-        view={this.props.view}
-      />
-      /* jshint ignore: end */
-    ];
+    var panes = [];
 
-    if (this.props.showParent) {
-      panes.push(
+    panes.push(new Pane({
+      key: directory.path,
+      item: directory,
+      active: active,
+      store: this.props.store,
+    }));
+
+    if (active) {
+      panes.push(new Pane({
+        key: active.path,
+        item: active,
+        active: child,
+        store: this.props.store,
+        view: this.props.view,
+      }));
+    }
+
+    var dir = currentDir;
+    while (dir.parent) {
+      panes.unshift(
         /* jshint ignore: start */
-        <Pane key='parent' type='parent'
-          item={parent}
-          active={directory}
+        <Pane key={dir.parent.path}
+          item={dir.parent}
+          active={dir}
           store={this.props.store}
         />
         /* jshint ignore: end */
       );
+      dir = dir.parent;
     }
 
     var classes = React.addons.classSet({
       'ranger': true,
       'focus': this.state.hasFocus,
-      'hide-parent': ! this.props.showParent,
     });
 
     return (
       /* jshint ignore: start */
       <div tabIndex='-1' className={classes} onFocus={this.focus} onMouseDown={this.focus}>
-        {panes}
+        <div ref='container' className='pane-container'>
+          {panes}
+        </div>
+        <Status item={active || currentDir} />
         <input type='text' ref='input'
           onKeyDown={this.handleKeyDown}
           onFocus={this.handleFocus}
