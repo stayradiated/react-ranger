@@ -4,6 +4,8 @@
 
 Uses React.
 
+![Screenshot](screenshot.jpg)
+
 ## Usage
 
 ```javascript
