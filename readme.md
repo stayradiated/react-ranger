@@ -10,7 +10,7 @@ Uses React.
 
 ```javascript
 var React = require('react');
-var Ranger = require('ranger');
+var Ranger = React.createFactory(require('ranger'));
 
 var files = Ranger.parseList([
     'code/test.txt',
@@ -22,5 +22,5 @@ var store = Ranger.createStore(files, function (item) {
   console.log('opening', item);
 });
 
-React.renderComponent(new Ranger({store: store}, document.body);
+React.render(Ranger({store: store}, document.body);
 ```

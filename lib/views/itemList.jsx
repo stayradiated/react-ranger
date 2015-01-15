@@ -62,17 +62,15 @@ var ItemList = React.createClass({
         }
 
         if (item instanceof DirectoryModel) {
-          return new Directory(options);
+          return <Directory {...options} />;
         } else {
-          return new File(options);
+          return <File {...options} />;
         }
       }, this);
     }
 
     return (
-      /* jshint ignore: start */
       <div className='item-list'>{contents}</div>
-      /* jshint ignore: end */
     );
   }
 

@@ -12,21 +12,16 @@ $(function () {
   var ItemView = React.createClass({
     render: function () {
       return (
-        /* jshint ignore: start */
         <div>
           <p><strong>Name:</strong> {this.props.item.name}</p>
           <p><strong>Path:</strong> {this.props.item.path}</p>
           <p><strong>Contents:</strong> {this.props.item.contents}</p>
         </div>
-        /* jshint ignore: end */
       );
     }
   });
 
-  React.renderComponent(new Ranger({
-    store: store,
-    view: ItemView,
-  }), document.body);
+  React.render(<Ranger store={store} view={ItemView} />, document.body);
 
   $.get('files.json').then(function (content) {
     store.setRootDir(Ranger.parseList(content));

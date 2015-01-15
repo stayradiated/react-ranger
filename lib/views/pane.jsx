@@ -23,14 +23,14 @@ var Pane = React.createClass({
 
     if (this.props.item) {
       if (this.props.item instanceof DirectoryModel) {
-        list = new ItemList({
-          contents: this.props.item.contents,
-          active: this.props.active,
-          store: this.props.store,
-        });
+        list = <ItemList
+          contents={this.props.item.contents}
+          active={this.props.active}
+          store={this.props.store}
+        />;
       } else {
         if (this.props.view) {
-          list = this.props.view({ item: this.props.item });
+          list = <this.props.view item={this.props.item} />;
         } else {
           list = this.props.item.name;
         }
@@ -38,11 +38,9 @@ var Pane = React.createClass({
     }
 
     return (
-      /* jshint ignore: start */
       <div className='pane'>
         {list}
       </div>
-      /* jshint ignore: end */
     );
   }
 

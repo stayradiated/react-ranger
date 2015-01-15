@@ -104,33 +104,35 @@ var Ranger = React.createClass({
 
     var panes = [];
 
-    panes.push(new Pane({
-      key: directory.path,
-      item: directory,
-      active: active,
-      store: this.props.store,
-    }));
+    panes.push(
+      <Pane
+        key={directory.path}
+        item={directory}
+        active={active}
+        store={this.props.store}
+      />
+    );
 
     if (active) {
-      panes.push(new Pane({
-        key: active.path,
-        item: active,
-        active: child,
-        store: this.props.store,
-        view: this.props.view,
-      }));
+      panes.push(
+        <Pane
+          key={active.path}
+          item={active}
+          active={child}
+          store={this.props.store}
+          view={this.props.view}
+        />
+      );
     }
 
     var dir = currentDir;
     while (dir.parent) {
       panes.unshift(
-        /* jshint ignore: start */
         <Pane key={dir.parent.path}
           item={dir.parent}
           active={dir}
           store={this.props.store}
         />
-        /* jshint ignore: end */
       );
       dir = dir.parent;
     }
@@ -141,7 +143,6 @@ var Ranger = React.createClass({
     });
 
     return (
-      /* jshint ignore: start */
       <div tabIndex='-1' className={classes} onFocus={this.focus} onMouseDown={this.focus}>
         <div ref='container' className='pane-container'>
           {panes}
@@ -153,7 +154,6 @@ var Ranger = React.createClass({
           onBlur={this.handleBlur}
         />
       </div>
-      /* jshint ignore: end */
     );
   },
 

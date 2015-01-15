@@ -1,6 +1,6 @@
 {
   "name": "react-ranger",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A column browser for the browser",
   "main": "pkg/index.js",
   "repository": {
@@ -17,23 +17,23 @@
   },
   "dependencies": {
     "lodash": "^2.4.1",
-    "react": "^0.11.1",
-    "reflux": "^0.1.7"
+    "react": "^0.12.2",
+    "reflux": "^0.2.3"
   },
   "devDependencies": {
-    "jquery": "^2.1.1",
-    "browserify": "^5.11.0",
-    "chai": "^1.9.1",
-    "gulp": "^3.8.7",
-    "gulp-autoprefixer": "0.0.10",
-    "gulp-connect": "^2.0.6",
-    "gulp-react": "^1.0.0",
-    "gulp-sass": "^0.7.3",
-    "gulp-uglify": "^1.0.1",
-    "mocha": "^1.20.1",
-    "reactify": "^0.14.0",
-    "sinon": "^1.10.2",
-    "vinyl-source-stream": "^0.1.1",
-    "watchify": "^1.0.1"
+    "jquery": "^2.1.3",
+    "browserify": "^8.1.0",
+    "chai": "^1.10.0",
+    "gulp": "^3.8.10",
+    "gulp-autoprefixer": "2.1.0",
+    "gulp-connect": "^2.2.0",
+    "gulp-react": "^2.0.0",
+    "gulp-sass": "^1.3.1",
+    "gulp-uglify": "^1.0.2",
+    "mocha": "^2.1.0",
+    "reactify": "^0.17.1",
+    "sinon": "^1.12.2",
+    "vinyl-source-stream": "^1.0.0",
+    "watchify": "^2.2.1"
   }
 }
